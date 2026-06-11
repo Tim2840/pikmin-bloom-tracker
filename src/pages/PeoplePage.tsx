@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { 
+import {
   UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
-  Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield
+  Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield,
+  ChevronUp, ChevronDown, Zap,
 } from 'lucide-react'
 
 // 預設的高對比亮麗 Pikmin 色系，長輩易點選與辨識
@@ -36,7 +38,8 @@ const getIconComponent = (iconName: string | undefined) => {
 }
 
 export default function PeoplePage() {
-  const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePerson } = usePeopleStore()
+  const navigate = useNavigate()
+  const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePerson, reorderPerson } = usePeopleStore()
 
   // 表單狀態
   const [name, setName] = useState('')
@@ -72,6 +75,10 @@ export default function PeoplePage() {
     e.preventDefault()
     if (!name.trim()) {
       showToast('請輸入名字！', 'error')
+      return
+    }
+    if (people.length >= 20) {
+      showToast('好友名單最多 20 位！', 'error')
       return
     }
     const success = await addPerson(name.trim(), nickname.trim(), selectedColor, selectedIcon)
@@ -139,8 +146,15 @@ export default function PeoplePage() {
           <h1 className="text-2xl md:text-3xl font-black text-stone-850 tracking-tight flex items-center">
             👥 人物管理
           </h1>
-          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單</p>
+          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單（最多 20 位）</p>
         </div>
+        <button
+          onClick={() => navigate('/people/quick-actions')}
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-4 py-2.5 rounded-2xl transition-all shadow-md shadow-amber-500/20 text-sm shrink-0"
+        >
+          <Zap className="w-4 h-4" />
+          快捷動作設定
+        </button>
       </div>
 
       {/* 離線/本地模式提示橫幅 */}
@@ -312,31 +326,50 @@ export default function PeoplePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3">
-              {people.map((person) => {
+              {people.map((person, idx) => {
                 const IconComp = getIconComponent(person.icon)
                 return (
                   <div
                     key={person.id}
-                    className="glass-card rounded-2xl p-4 flex items-center justify-between group"
+                    className="glass-card rounded-2xl p-4 flex items-center gap-3 group"
                   >
-                    <div className="flex items-center space-x-3.5 min-w-0">
-                      {/* 大彩色頭像 */}
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
-                        style={{ backgroundColor: person.color || '#6B7280' }}
+                    {/* 排序按鈕 */}
+                    <div className="flex flex-col gap-1 shrink-0">
+                      <button
+                        onClick={() => reorderPerson(person.id, 'up')}
+                        disabled={idx === 0}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        title="往上移"
                       >
-                        <IconComp className="w-6 h-6" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
-                          {person.name}
-                        </h3>
-                        {person.nickname && (
-                          <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
-                            暱稱：{person.nickname}
-                          </span>
-                        )}
-                      </div>
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => reorderPerson(person.id, 'down')}
+                        disabled={idx === people.length - 1}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        title="往下移"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* 大彩色頭像 */}
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
+                      style={{ backgroundColor: person.color || '#6B7280' }}
+                    >
+                      <IconComp className="w-6 h-6" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
+                        {person.name}
+                      </h3>
+                      {person.nickname && (
+                        <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
+                          暱稱：{person.nickname}
+                        </span>
+                      )}
                     </div>
 
                     {/* 操作按鈕 */}

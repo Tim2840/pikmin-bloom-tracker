@@ -7,12 +7,14 @@ export interface Person {
   nickname?: string;
   color?: string;
   icon?: string;
+  sortOrder: number;
   createdAt: string;
 }
 
 export interface RecordItem {
   id: string;
-  personId: string;
+  personId: string | null;
+  personNameSnapshot: string;
   date: string; // YYYY-MM-DD
   itemType: ItemType;
   actionType: ActionType;
@@ -27,4 +29,6 @@ export interface QuickAction {
   itemType: ItemType;
   actionType: ActionType;
   useToday: boolean;
+  sortOrder: number;
+  createdAt: string;
 }
