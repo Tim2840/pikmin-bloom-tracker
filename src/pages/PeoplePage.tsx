@@ -136,10 +136,10 @@ export default function PeoplePage() {
       {/* 頂部標題 */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-black text-stone-850 tracking-tight flex items-center">
+          <h1 className="text-2xl md:text-3xl font-black text-stone-850 tracking-tight flex items-center">
             👥 人物管理
           </h1>
-          <p className="text-stone-500 text-sm">新增並設定常用好友名單</p>
+          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單</p>
         </div>
       </div>
 
@@ -174,194 +174,195 @@ export default function PeoplePage() {
         </div>
       )}
 
-      {/* 新增人物表單 */}
-      <section className="glass-card rounded-3xl p-5 mb-8">
-        <h2 className="text-lg font-extrabold text-stone-850 mb-4 flex items-center">
-          <UserPlus className="w-5 h-5 mr-2 text-lime-600" />
-          建立新人物
-        </h2>
+      {/* RWD 網格版面：在 md (768px) 以上寬度時分為左右兩欄，手機端則維持上下堆疊 */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         
-        <form onSubmit={handleAdd} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-stone-600 mb-1.5">
-              好友姓名 <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="例如：王小明"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-stone-600 mb-1.5">
-              小名 / 暱稱 <span className="text-stone-400 text-xs font-normal">(選填)</span>
-            </label>
-            <input
-              type="text"
-              placeholder="例如：阿明 (顯示於首頁快捷區)"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
-            />
-          </div>
-
-          {/* 色彩選擇器 — 超大按鈕 */}
-          <div>
-            <label className="block text-sm font-bold text-stone-600 mb-2">
-              代表顏色 <span className="text-stone-400 text-xs font-normal">(大按鈕易於點選)</span>
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              {COLOR_PRESETS.map((preset) => (
-                <button
-                  key={preset.value}
-                  type="button"
-                  onClick={() => setSelectedColor(preset.value)}
-                  className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
-                  style={{
-                    backgroundColor: selectedColor === preset.value ? `${preset.value}15` : '#FFFFFF', // 點選時帶有半透明背景
-                    borderColor: selectedColor === preset.value ? preset.value : '#E5E7EB',
-                    borderWidth: '2px'
-                  }}
-                >
-                  <span
-                    className="w-7 h-7 rounded-full shadow-inner flex items-center justify-center text-white"
-                    style={{ backgroundColor: preset.value }}
-                  >
-                    {selectedColor === preset.value && <Check className="w-4 h-4" />}
-                  </span>
-                  <span 
-                    className="text-[11px] mt-1 font-bold"
-                    style={{ color: preset.value }}
-                  >
-                    {preset.label}
-                  </span>
-                </button>
-              ))}
+        {/* 新增人物表單 (左側欄，佔 5/12) */}
+        <section className="md:col-span-5 glass-card rounded-3xl p-5 shadow-sm">
+          <h2 className="text-lg font-extrabold text-stone-850 mb-4 flex items-center">
+            <UserPlus className="w-5 h-5 mr-2 text-lime-600" />
+            建立新人物
+          </h2>
+          
+          <form onSubmit={handleAdd} className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                好友姓名 <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="例如：王小明"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+              />
             </div>
-          </div>
 
-          {/* 圖標選擇器 (Lucide 圖庫) — 超大按鈕 */}
-          <div>
-            <label className="block text-sm font-bold text-stone-600 mb-2">
-              代表圖樣 <span className="text-stone-400 text-xs font-normal">(Lucide 圖庫類型)</span>
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              {ICON_PRESETS.map((preset) => {
-                const IconComponent = preset.component
-                const isSelected = selectedIcon === preset.value
-                return (
+            <div>
+              <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                小名 / 暱稱 <span className="text-stone-400 text-xs font-normal">(選填)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="例如：阿明 (顯示於首頁快捷區)"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+              />
+            </div>
+
+            {/* 色彩選擇器 */}
+            <div>
+              <label className="block text-sm font-bold text-stone-600 mb-2">
+                代表顏色 <span className="text-stone-400 text-xs font-normal">(大按鈕易於點選)</span>
+              </label>
+              <div className="grid grid-cols-4 gap-2.5">
+                {COLOR_PRESETS.map((preset) => (
                   <button
                     key={preset.value}
                     type="button"
-                    onClick={() => setSelectedIcon(preset.value)}
+                    onClick={() => setSelectedColor(preset.value)}
                     className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
                     style={{
-                      backgroundColor: isSelected ? `${selectedColor}15` : '#FFFFFF',
-                      borderColor: isSelected ? selectedColor : '#E5E7EB',
+                      backgroundColor: selectedColor === preset.value ? `${preset.value}15` : '#FFFFFF',
+                      borderColor: selectedColor === preset.value ? preset.value : '#E5E7EB',
                       borderWidth: '2px'
                     }}
                   >
-                    <IconComponent 
-                      className="w-6 h-6 transition-transform" 
-                      style={{ color: isSelected ? selectedColor : '#6B7280' }} 
-                    />
+                    <span
+                      className="w-7 h-7 rounded-full shadow-inner flex items-center justify-center text-white"
+                      style={{ backgroundColor: preset.value }}
+                    >
+                      {selectedColor === preset.value && <Check className="w-4 h-4" />}
+                    </span>
                     <span 
                       className="text-[11px] mt-1 font-bold"
-                      style={{ color: isSelected ? selectedColor : '#6B7280' }}
+                      style={{ color: preset.value }}
                     >
                       {preset.label}
                     </span>
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 圖標選擇器 */}
+            <div>
+              <label className="block text-sm font-bold text-stone-600 mb-2">
+                代表圖樣 <span className="text-stone-400 text-xs font-normal">(選擇好友類型)</span>
+              </label>
+              <div className="grid grid-cols-4 gap-2.5">
+                {ICON_PRESETS.map((preset) => {
+                  const IconComponent = preset.component
+                  const isSelected = selectedIcon === preset.value
+                  return (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => setSelectedIcon(preset.value)}
+                      className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
+                      style={{
+                        backgroundColor: isSelected ? `${selectedColor}15` : '#FFFFFF',
+                        borderColor: isSelected ? selectedColor : '#E5E7EB',
+                        borderWidth: '2px'
+                      }}
+                    >
+                      <IconComponent 
+                        className="w-6 h-6 transition-transform" 
+                        style={{ color: isSelected ? selectedColor : '#6B7280' }} 
+                      />
+                      <span 
+                        className="text-[11px] mt-1 font-bold"
+                        style={{ color: isSelected ? selectedColor : '#6B7280' }}
+                      >
+                        {preset.label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full h-12 mt-4 bg-lime-600 hover:bg-lime-700 active:scale-98 text-white font-extrabold text-base rounded-2xl transition-all shadow-md shadow-lime-600/20 flex items-center justify-center"
+            >
+              建立新人物
+            </button>
+          </form>
+        </section>
+
+        {/* 人物名冊清單 (右側欄，佔 7/12) */}
+        <section className="md:col-span-7 mt-8 md:mt-0">
+          <h2 className="text-lg font-extrabold text-stone-850 mb-4">
+            👥 好友名冊 ({people.length} 人)
+          </h2>
+
+          {loading && people.length === 0 ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 bg-stone-200/50 rounded-2xl animate-pulse" />
+              ))}
+            </div>
+          ) : people.length === 0 ? (
+            <div className="glass-card rounded-3xl p-8 text-center text-stone-500">
+              <span className="text-4xl block mb-2">👋</span>
+              <p className="font-bold text-stone-700">目前名冊空空的喔！</p>
+              <p className="text-xs text-stone-400 mt-1">請使用左側表單新增第一位好友吧！</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3">
+              {people.map((person) => {
+                const IconComp = getIconComponent(person.icon)
+                return (
+                  <div
+                    key={person.id}
+                    className="glass-card rounded-2xl p-4 flex items-center justify-between group"
+                  >
+                    <div className="flex items-center space-x-3.5 min-w-0">
+                      {/* 大彩色頭像 */}
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
+                        style={{ backgroundColor: person.color || '#6B7280' }}
+                      >
+                        <IconComp className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
+                          {person.name}
+                        </h3>
+                        {person.nickname && (
+                          <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
+                            暱稱：{person.nickname}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 操作按鈕 */}
+                    <div className="flex space-x-2 shrink-0">
+                      <button
+                        onClick={() => startEdit(person)}
+                        className="accessible-target flex items-center justify-center p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+                        title="編輯"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingPersonId(person.id)}
+                        className="accessible-target flex items-center justify-center p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                        title="刪除"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
                 )
               })}
             </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full h-12 mt-4 bg-lime-600 hover:bg-lime-700 active:scale-98 text-white font-extrabold text-base rounded-2xl transition-all shadow-md shadow-lime-600/20 flex items-center justify-center"
-          >
-            建立新人物
-          </button>
-        </form>
-      </section>
-
-      {/* 人物名冊清單 */}
-      <section>
-        <h2 className="text-lg font-extrabold text-stone-850 mb-4">
-          👥 好友名冊 ({people.length} 人)
-        </h2>
-
-        {loading && people.length === 0 ? (
-          // 骨架屏載入中
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-stone-200/50 rounded-2xl animate-pulse" />
-            ))}
-          </div>
-        ) : people.length === 0 ? (
-          // 空狀態
-          <div className="glass-card rounded-3xl p-8 text-center text-stone-500">
-            <span className="text-4xl block mb-2">👋</span>
-            <p className="font-bold text-stone-700">目前名冊空空的喔！</p>
-            <p className="text-xs text-stone-400 mt-1">請使用上方表單新增第一位好友吧！</p>
-          </div>
-        ) : (
-          // 名單渲染
-          <div className="space-y-3">
-            {people.map((person) => {
-              const IconComp = getIconComponent(person.icon)
-              return (
-                <div
-                  key={person.id}
-                  className="glass-card rounded-2xl p-4 flex items-center justify-between group"
-                >
-                  <div className="flex items-center space-x-3.5">
-                    {/* 大彩色頭像 */}
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
-                      style={{ backgroundColor: person.color || '#6B7280' }}
-                    >
-                      <IconComp className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-black text-lg text-stone-800 leading-tight">
-                        {person.name}
-                      </h3>
-                      {person.nickname && (
-                        <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block">
-                          暱稱：{person.nickname}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* 操作按鈕（大尺寸防誤觸） */}
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => startEdit(person)}
-                      className="accessible-target flex items-center justify-center p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
-                      title="編輯"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => setDeletingPersonId(person.id)}
-                      className="accessible-target flex items-center justify-center p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                      title="刪除"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
 
       {/* 編輯 Dialog 彈窗 */}
       {editingPersonId && (

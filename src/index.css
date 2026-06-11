@@ -43,3 +43,23 @@
   min-height: 48px;
   min-width: 48px;
 }
+
+/* Keyframe animations used in PeoplePage & components */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out both;
+}
+
+.animate-scale-up {
+  animation: scale-up 0.2s ease-out both;
+}
+

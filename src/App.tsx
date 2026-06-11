@@ -8,15 +8,15 @@ import StatsPage from './pages/StatsPage'
 export default function App() {
   return (
     <Router>
-      <div className="flex-1 pb-28 pt-6 max-w-md mx-auto w-full px-4">
+      <Navbar />
+      <main className="flex-1 pb-32 pt-6 md:pb-16 md:pt-8 max-w-full md:max-w-6xl mx-auto w-full px-4 md:px-6">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/stats" element={<StatsPage />} />
         </Routes>
-      </div>
-      <Navbar />
+      </main>
     </Router>
   )
 }
