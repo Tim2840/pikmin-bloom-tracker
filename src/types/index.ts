@@ -6,6 +6,7 @@ export interface Person {
   name: string;
   nickname?: string;
   color?: string;
+  icon?: string;
   createdAt: string;
 }
 

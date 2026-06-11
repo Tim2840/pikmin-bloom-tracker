@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle } from 'lucide-react'
+import { 
+  UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
+  Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield
+} from 'lucide-react'
 
 // 預設的高對比亮麗 Pikmin 色系，長輩易點選與辨識
 const COLOR_PRESETS = [
@@ -15,6 +18,23 @@ const COLOR_PRESETS = [
   { value: '#6B7280', label: '灰皮敏' }
 ]
 
+// 預設的 Lucide 圖標庫，供長輩代表不同好友類別
+const ICON_PRESETS = [
+  { value: 'Smile', component: Smile, label: '一般' },
+  { value: 'Heart', component: Heart, label: '最愛' },
+  { value: 'Star', component: Star, label: '精選' },
+  { value: 'Crown', component: Crown, label: '主要' },
+  { value: 'Flower2', component: Flower2, label: '皮敏花' },
+  { value: 'Leaf', component: Leaf, label: '皮敏葉' },
+  { value: 'Gift', component: Gift, label: '送禮' },
+  { value: 'Shield', component: Shield, label: '戰友' }
+]
+
+const getIconComponent = (iconName: string | undefined) => {
+  const found = ICON_PRESETS.find(i => i.value === iconName)
+  return found ? found.component : Smile
+}
+
 export default function PeoplePage() {
   const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePerson } = usePeopleStore()
 
@@ -22,12 +42,14 @@ export default function PeoplePage() {
   const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
   const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0].value)
+  const [selectedIcon, setSelectedIcon] = useState(ICON_PRESETS[0].value)
 
   // 編輯與刪除狀態
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editNickname, setEditNickname] = useState('')
   const [editColor, setEditColor] = useState('')
+  const [editIcon, setEditIcon] = useState(ICON_PRESETS[0].value)
 
   const [deletingPersonId, setDeletingPersonId] = useState<string | null>(null)
 
@@ -52,11 +74,12 @@ export default function PeoplePage() {
       showToast('請輸入名字！', 'error')
       return
     }
-    const success = await addPerson(name.trim(), nickname.trim(), selectedColor)
+    const success = await addPerson(name.trim(), nickname.trim(), selectedColor, selectedIcon)
     if (success) {
       setName('')
       setNickname('')
       setSelectedColor(COLOR_PRESETS[0].value)
+      setSelectedIcon(ICON_PRESETS[0].value)
       showToast(`成功新增好友：${name}`)
     } else {
       showToast('新增失敗', 'error')
@@ -69,6 +92,7 @@ export default function PeoplePage() {
     setEditName(person.name)
     setEditNickname(person.nickname || '')
     setEditColor(person.color || COLOR_PRESETS[0].value)
+    setEditIcon(person.icon || ICON_PRESETS[0].value)
   }
 
   // 儲存編輯
@@ -82,7 +106,8 @@ export default function PeoplePage() {
     const success = await updatePerson(editingPersonId, {
       name: editName.trim(),
       nickname: editNickname.trim(),
-      color: editColor
+      color: editColor,
+      icon: editIcon
     })
 
     if (success) {
@@ -194,10 +219,10 @@ export default function PeoplePage() {
                   key={preset.value}
                   type="button"
                   onClick={() => setSelectedColor(preset.value)}
-                  className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200"
+                  className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
                   style={{
-                    backgroundColor: `${preset.value}15`, // 透明背景
-                    borderColor: selectedColor === preset.value ? preset.value : 'transparent',
+                    backgroundColor: selectedColor === preset.value ? `${preset.value}15` : '#FFFFFF', // 點選時帶有半透明背景
+                    borderColor: selectedColor === preset.value ? preset.value : '#E5E7EB',
                     borderWidth: '2px'
                   }}
                 >
@@ -215,6 +240,43 @@ export default function PeoplePage() {
                   </span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* 圖標選擇器 (Lucide 圖庫) — 超大按鈕 */}
+          <div>
+            <label className="block text-sm font-bold text-stone-600 mb-2">
+              代表圖樣 <span className="text-stone-400 text-xs font-normal">(Lucide 圖庫類型)</span>
+            </label>
+            <div className="grid grid-cols-4 gap-3">
+              {ICON_PRESETS.map((preset) => {
+                const IconComponent = preset.component
+                const isSelected = selectedIcon === preset.value
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => setSelectedIcon(preset.value)}
+                    className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
+                    style={{
+                      backgroundColor: isSelected ? `${selectedColor}15` : '#FFFFFF',
+                      borderColor: isSelected ? selectedColor : '#E5E7EB',
+                      borderWidth: '2px'
+                    }}
+                  >
+                    <IconComponent 
+                      className="w-6 h-6 transition-transform" 
+                      style={{ color: isSelected ? selectedColor : '#6B7280' }} 
+                    />
+                    <span 
+                      className="text-[11px] mt-1 font-bold"
+                      style={{ color: isSelected ? selectedColor : '#6B7280' }}
+                    >
+                      {preset.label}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -250,50 +312,53 @@ export default function PeoplePage() {
         ) : (
           // 名單渲染
           <div className="space-y-3">
-            {people.map((person) => (
-              <div
-                key={person.id}
-                className="glass-card rounded-2xl p-4 flex items-center justify-between group"
-              >
-                <div className="flex items-center space-x-3.5">
-                  {/* 大彩色頭像 */}
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-sm"
-                    style={{ backgroundColor: person.color || '#6B7280' }}
-                  >
-                    {(person.nickname || person.name).charAt(0)}
+            {people.map((person) => {
+              const IconComp = getIconComponent(person.icon)
+              return (
+                <div
+                  key={person.id}
+                  className="glass-card rounded-2xl p-4 flex items-center justify-between group"
+                >
+                  <div className="flex items-center space-x-3.5">
+                    {/* 大彩色頭像 */}
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
+                      style={{ backgroundColor: person.color || '#6B7280' }}
+                    >
+                      <IconComp className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-lg text-stone-800 leading-tight">
+                        {person.name}
+                      </h3>
+                      {person.nickname && (
+                        <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block">
+                          暱稱：{person.nickname}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-black text-lg text-stone-800 leading-tight">
-                      {person.name}
-                    </h3>
-                    {person.nickname && (
-                      <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block">
-                        暱稱：{person.nickname}
-                      </span>
-                    )}
-                  </div>
-                </div>
 
-                {/* 操作按鈕（大尺寸防誤觸） */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => startEdit(person)}
-                    className="accessible-target flex items-center justify-center p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
-                    title="編輯"
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingPersonId(person.id)}
-                    className="accessible-target flex items-center justify-center p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                    title="刪除"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  {/* 操作按鈕（大尺寸防誤觸） */}
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => startEdit(person)}
+                      className="accessible-target flex items-center justify-center p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors"
+                      title="編輯"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingPersonId(person.id)}
+                      className="accessible-target flex items-center justify-center p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                      title="刪除"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>
@@ -301,7 +366,7 @@ export default function PeoplePage() {
       {/* 編輯 Dialog 彈窗 */}
       {editingPersonId && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl border border-stone-100 animate-scale-up">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl border border-stone-100 animate-scale-up max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-black text-stone-850">✏️ 編輯好友資料</h3>
               <button 
@@ -319,7 +384,7 @@ export default function PeoplePage() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 text-base"
+                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 text-base bg-white text-stone-800"
                 />
               </div>
 
@@ -329,10 +394,11 @@ export default function PeoplePage() {
                   type="text"
                   value={editNickname}
                   onChange={(e) => setEditNickname(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 text-base"
+                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 text-base bg-white text-stone-800"
                 />
               </div>
 
+              {/* 編輯顏色 */}
               <div>
                 <label className="block text-sm font-bold text-stone-600 mb-2">代表顏色</label>
                 <div className="grid grid-cols-4 gap-2.5">
@@ -341,10 +407,10 @@ export default function PeoplePage() {
                       key={preset.value}
                       type="button"
                       onClick={() => setEditColor(preset.value)}
-                      className="accessible-target relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200"
+                      className="accessible-target relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 bg-white"
                       style={{
-                        backgroundColor: `${preset.value}15`,
-                        borderColor: editColor === preset.value ? preset.value : 'transparent',
+                        backgroundColor: editColor === preset.value ? `${preset.value}15` : '#FFFFFF',
+                        borderColor: editColor === preset.value ? preset.value : '#E5E7EB',
                         borderWidth: '2px'
                       }}
                     >
@@ -356,6 +422,35 @@ export default function PeoplePage() {
                       </span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* 編輯圖樣 */}
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-2">代表圖樣</label>
+                <div className="grid grid-cols-4 gap-2.5">
+                  {ICON_PRESETS.map((preset) => {
+                    const IconComponent = preset.component
+                    const isSelected = editIcon === preset.value
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => setEditIcon(preset.value)}
+                        className="accessible-target relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 bg-white"
+                        style={{
+                          backgroundColor: isSelected ? `${editColor}15` : '#FFFFFF',
+                          borderColor: isSelected ? editColor : '#E5E7EB',
+                          borderWidth: '2px'
+                        }}
+                      >
+                        <IconComponent 
+                          className="w-5 h-5" 
+                          style={{ color: isSelected ? editColor : '#6B7280' }} 
+                        />
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 

@@ -7,7 +7,7 @@ interface PeopleState {
   loading: boolean
   error: string | null
   fetchPeople: () => Promise<void>
-  addPerson: (name: string, nickname?: string, color?: string) => Promise<boolean>
+  addPerson: (name: string, nickname?: string, color?: string, icon?: string) => Promise<boolean>
   updatePerson: (id: string, updates: Partial<Omit<Person, 'id' | 'createdAt'>>) => Promise<boolean>
   deletePerson: (id: string) => Promise<boolean>
 }
@@ -61,6 +61,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
           name: p.name,
           nickname: p.nickname || undefined,
           color: p.color || undefined,
+          icon: p.icon || undefined,
           createdAt: p.created_at,
         }))
         
@@ -79,7 +80,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
     }
   },
 
-  addPerson: async (name, nickname, color) => {
+  addPerson: async (name, nickname, color, icon) => {
     set({ loading: true, error: null })
     const newPersonId = crypto.randomUUID()
     const nowIso = new Date().toISOString()
@@ -89,6 +90,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
       name,
       nickname: nickname || undefined,
       color: color || '#6B7280',
+      icon: icon || undefined,
       createdAt: nowIso,
     }
 
@@ -112,6 +114,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
             name,
             nickname: nickname || null,
             color: color || '#6B7280',
+            icon: icon || null,
             created_at: nowIso
           }
         ])
@@ -126,6 +129,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
           name: data[0].name,
           nickname: data[0].nickname || undefined,
           color: data[0].color || undefined,
+          icon: data[0].icon || undefined,
           createdAt: data[0].created_at,
         }
         
@@ -160,6 +164,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
           name: updates.name !== undefined ? updates.name : p.name,
           nickname: updates.nickname !== undefined ? updates.nickname : p.nickname,
           color: updates.color !== undefined ? updates.color : p.color,
+          icon: updates.icon !== undefined ? updates.icon : p.icon,
         }
       }
       return p
@@ -178,6 +183,7 @@ export const usePeopleStore = create<PeopleState>((set) => ({
           name: updates.name,
           nickname: updates.nickname || null,
           color: updates.color,
+          icon: updates.icon || null,
         })
         .eq('id', id)
 
