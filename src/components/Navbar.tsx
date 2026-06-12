@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Users, History, BarChart3 } from 'lucide-react'
+import { Home, Users, History, BarChart3, CalendarDays } from 'lucide-react'
 
 export default function Navbar() {
   const navItems = [
     { to: '/', label: '首頁', icon: Home },
     { to: '/people', label: '人物管理', icon: Users },
     { to: '/records', label: '互動紀錄', icon: History },
+    { to: '/calendar', label: '月曆', icon: CalendarDays },
     { to: '/stats', label: '簡單統計', icon: BarChart3 },
   ]
 
