@@ -36,3 +36,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dev helper scripts
+fix-git-lock.bat
+
+# deploy 輸出檔（可能含 GitHub token，勿提交）
+*-result.txt
