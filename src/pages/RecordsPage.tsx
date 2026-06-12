@@ -54,12 +54,12 @@ export default function RecordsPage() {
     return '#9CA3AF'
   }
 
-  // 篩選 + 最近 30 筆（資料已依日期降序）
+  // 無篩選時顯示最近 30 筆；有篩選條件時顯示全部符合結果
   const filtered = useMemo(() => {
-    return records
+    const result = records
       .filter(r => filterPersonId === 'all' || r.personId === filterPersonId)
       .filter(r => filterItem === 'all' || r.itemType === filterItem)
-      .slice(0, 30)
+    return (filterPersonId === 'all' && filterItem === 'all') ? result.slice(0, 30) : result
   }, [records, filterPersonId, filterItem])
 
   const handleAdd = async (values: RecordFormValues) => {
@@ -210,7 +210,7 @@ export default function RecordsPage() {
       ) : (
         <div className="space-y-3">
           <p className="text-xs font-bold text-stone-400 px-1">
-            顯示最近 {filtered.length} 筆{hasFilter ? '（已篩選）' : ''}
+            {hasFilter ? `篩選結果：共 ${filtered.length} 筆` : `顯示最近 ${filtered.length} 筆`}
           </p>
           {filtered.map(r => {
             const meta = ITEM_META[r.itemType]
@@ -327,7 +327,7 @@ export default function RecordsPage() {
                 onClick={() => handleDelete(deletingId)}
                 className="flex-1 h-12 rounded-xl bg-rose-600 text-white font-extrabold hover:bg-rose-700 transition-colors"
               >
-                確定刪除
+                確認刪除
               </button>
             </div>
           </div>
