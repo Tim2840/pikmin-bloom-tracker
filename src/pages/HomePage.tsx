@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle } from 'lucide-react'
+import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle, Plus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { ITEM_META } from '../lib/recordLabels'
+import RecordForm, { RecordFormValues } from '../components/RecordForm'
 
 
 const FEATURE_CARDS = [
@@ -53,6 +54,7 @@ export default function HomePage() {
 
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [tapping, setTapping] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
     fetchQuickActions()
@@ -90,6 +92,17 @@ export default function HomePage() {
     if (success) {
       const meta = ITEM_META[action.itemType]
       showToast(`已記錄：${person.name} / ${date} / ${meta.label}`)
+    } else {
+      showToast('紀錄失敗，請重試。', 'error')
+    }
+  }
+
+  const handleAddRecord = async (values: RecordFormValues) => {
+    const success = await addRecord(values)
+    if (success) {
+      const meta = ITEM_META[values.itemType]
+      showToast(`已記錄：${values.personNameSnapshot} / ${values.date} / ${meta.label}`)
+      setShowAddModal(false)
     } else {
       showToast('紀錄失敗，請重試。', 'error')
     }
@@ -142,7 +155,8 @@ export default function HomePage() {
               { label: '人物管理 CRUD', done: true },
               { label: '快捷動作', done: true },
               { label: '互動紀錄功能', done: true },
-              { label: '統計圖表', done: false },
+              { label: '統計分析', done: true },
+              { label: '月曆檢視', done: true },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
@@ -159,85 +173,73 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 快捷動作區塊 */}
-      {quickActions.length > 0 ? (
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500" />
-              快速紀錄
-            </h2>
+      {/* 快速紀錄區塊 */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            快速紀錄
+          </h2>
+          <div className="flex items-center gap-2">
+            {quickActions.length > 0 && (
+              <button
+                onClick={() => navigate('/people/quick-actions')}
+                className="text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors"
+              >
+                管理 →
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {/* 手動新增紀錄按鈕（永遠顯示） */}
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base border-2 border-dashed border-sky-300 text-sky-600 bg-sky-50 hover:bg-sky-100 transition-all active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            新增紀錄
+          </button>
+          {/* 快捷動作按鈕 */}
+          {quickActions.map(action => {
+            const person = people.find(p => p.id === action.personId)
+            const itemEmoji = ITEM_META[action.itemType].emoji
+            const isTapping = tapping === action.id
+            return (
+              <button
+                key={action.id}
+                onClick={() => handleQuickAction(action.id)}
+                disabled={isTapping}
+                className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base text-white shadow-md transition-all active:scale-95 disabled:opacity-60"
+                style={{
+                  backgroundColor: person?.color || '#6B7280',
+                  boxShadow: `0 4px 12px ${person?.color || '#6B7280'}40`,
+                }}
+              >
+                {isTapping ? (
+                  <span className="w-5 h-5 border-2 border-white/60 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <span className="text-xl">{itemEmoji}</span>
+                )}
+                {action.label}
+              </button>
+            )
+          })}
+          {/* 若無快捷動作，顯示引導設定 */}
+          {quickActions.length === 0 && (
             <button
               onClick={() => navigate('/people/quick-actions')}
-              className="text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors"
+              className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-base border-2 border-dashed border-amber-300 text-amber-600 bg-amber-50 hover:bg-amber-100 transition-all"
             >
-              管理 →
+              <Zap className="w-5 h-5" />
+              設定快捷動作
             </button>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {quickActions.map(action => {
-              const person = people.find(p => p.id === action.personId)
-              const itemEmoji = ITEM_META[action.itemType].emoji
-              const isTapping = tapping === action.id
-              return (
-                <button
-                  key={action.id}
-                  onClick={() => handleQuickAction(action.id)}
-                  disabled={isTapping}
-                  className="flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base text-white shadow-md transition-all active:scale-95 disabled:opacity-60"
-                  style={{
-                    backgroundColor: person?.color || '#6B7280',
-                    boxShadow: `0 4px 12px ${person?.color || '#6B7280'}40`,
-                  }}
-                >
-                  {isTapping ? (
-                    <span className="w-5 h-5 border-2 border-white/60 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <span className="text-xl">{itemEmoji}</span>
-                  )}
-                  {action.label}
-                </button>
-              )
-            })}
-          </div>
+          )}
         </div>
-      ) : (
-        <div className="mb-10">
-          <button
-            onClick={() => navigate('/people/quick-actions')}
-            className="w-full glass-card rounded-2xl p-4 border border-dashed border-amber-300 flex items-center gap-3 hover:border-amber-400 transition-colors group"
-          >
-            <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-              <Zap className="w-5 h-5 text-amber-500" />
-            </div>
-            <div className="text-left">
-              <p className="font-bold text-stone-700 text-sm group-hover:text-amber-700 transition-colors">設定快捷動作</p>
-              <p className="text-stone-400 text-xs">一鍵記錄常用互動，省去每次手動選擇</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-stone-400 ml-auto group-hover:text-amber-500 transition-colors" />
-          </button>
-        </div>
-      )}
-
-      {/* 功能捷徑卡片區 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {FEATURE_CARDS.map((card) => {
-          const Icon = card.icon
-          return (
-            <button
-              key={card.to}
-              onClick={() => navigate(card.to)}
-              className={`glass-card rounded-2xl p-5 text-left border ${card.borderClass} group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 w-full`}
-            >
-              <div className={`w-12 h-12 rounded-2xl ${card.bgClass} flex items-center justify-center mb-3`}>
-                <Icon className={`w-6 h-6 ${card.textClass}`} />
-              </div>
-              <h3 className={`font-extrabold text-base ${card.textClass} mb-1`}>{card.title}</h3>
-              <p className="text-stone-500 text-sm leading-relaxed">{card.desc}</p>
-            </button>
-          )
-        })}
       </div>
-    </div>
-  )
-}
+
+      {/* 新增紀錄 Modal */}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-end sm:items-center justify-center p-4"
+          onClick={(e) => { if (e.target 
