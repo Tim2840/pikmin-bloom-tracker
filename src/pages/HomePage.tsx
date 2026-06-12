@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
+import { ITEM_META } from '../lib/recordLabels'
+
 
 const FEATURE_CARDS = [
   {
@@ -86,8 +88,8 @@ export default function HomePage() {
 
     setTapping(null)
     if (success) {
-      const itemLabel = action.itemType === 'postcard' ? '明信片' : '蘑菇'
-      showToast(`已記錄：${person.name} / ${date} / ${itemLabel}`)
+      const meta = ITEM_META[action.itemType]
+      showToast(`已記錄：${person.name} / ${date} / ${meta.label}`)
     } else {
       showToast('紀錄失敗，請重試。', 'error')
     }
@@ -175,7 +177,7 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-3">
             {quickActions.map(action => {
               const person = people.find(p => p.id === action.personId)
-              const itemEmoji = action.itemType === 'postcard' ? '📮' : '🍄'
+              const itemEmoji = ITEM_META[action.itemType].emoji
               const isTapping = tapping === action.id
               return (
                 <button

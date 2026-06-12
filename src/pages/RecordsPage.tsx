@@ -7,24 +7,8 @@ import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, RecordItem } from '../types'
+import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import RecordForm, { RecordFormValues } from '../components/RecordForm'
-
-const ITEM_META: Record<ItemType, { emoji: string; label: string }> = {
-  postcard: { emoji: '📮', label: '明信片' },
-  mushroom: { emoji: '🍄', label: '蘑菇' },
-}
-
-const ACTION_LABEL: Record<string, string> = {
-  sent: '寄出',
-  received: '收到',
-  helped: '協助打',
-}
-
-const ACTION_STYLE: Record<string, string> = {
-  sent: 'bg-amber-50 text-amber-700',
-  received: 'bg-lime-50 text-lime-700',
-  helped: 'bg-violet-50 text-violet-700',
-}
 
 const formatDate = (dateStr: string) => {
   const [y, m, d] = dateStr.split('-')
@@ -245,7 +229,7 @@ export default function RecordsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-black text-base text-stone-800 truncate">{personName(r)}</h3>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ACTION_STYLE[r.actionType]}`}>
-                      {ACTION_LABEL[r.actionType]}{meta.label}
+                      {actionFullLabel(r.itemType, r.actionType)}
                     </span>
                   </div>
                   <p className="text-xs text-stone-400 mt-0.5">

@@ -1,16 +1,11 @@
 import { useState } from 'react'
 import { Check } from 'lucide-react'
 import { ItemType, ActionType, Person, RecordItem } from '../types'
+import { ITEM_META, DIRECTIONS, actionButtonLabel } from '../lib/recordLabels'
 
-const ITEM_OPTIONS: { value: ItemType; label: string; emoji: string }[] = [
-  { value: 'postcard', label: '明信片', emoji: '📮' },
-  { value: 'mushroom', label: '蘑菇', emoji: '🍄' },
-]
-
-const ACTION_OPTIONS: { value: ActionType; label: string }[] = [
-  { value: 'sent', label: '寄出' },
-  { value: 'received', label: '收到' },
-  { value: 'helped', label: '協助打' },
+const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
+  { value: 'postcard', ...ITEM_META.postcard },
+  { value: 'mushroom', ...ITEM_META.mushroom },
 ]
 
 const toDateStr = (d: Date) =>
@@ -48,10 +43,18 @@ interface RecordFormProps {
 export default function RecordForm({ people, initial, submitLabel, onSubmit, onCancel }: RecordFormProps) {
   const [personId, setPersonId] = useState(initial?.personId ?? '')
   const [itemType, setItemType] = useState<ItemType>(initial?.itemType ?? 'postcard')
-  const [actionType, setActionType] = useState<ActionType>(initial?.actionType ?? 'sent')
+  const [actionType, setActionType] = useState<ActionType>(
+    initial?.actionType && initial.actionType !== 'helped' ? initial.actionType : 'sent'
+  )
   const [date, setDate] = useState(initial?.date ?? getOffsetDate(0))
   const [note, setNote] = useState(initial?.note ?? '')
   const [errorText, setErrorText] = useState('')
+
+  // 切換品項時保留方向（往外仍往外），僅把舊的 helped 正規化為 sent
+  const handleItemChange = (value: ItemType) => {
+    setItemType(value)
+    if (actionType === 'helped') setActionType('sent')
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,7 +124,7 @@ export default function RecordForm({ people, initial, submitLabel, onSubmit, onC
             <button
               key={opt.value}
               type="button"
-              onClick={() => setItemType(opt.value)}
+              onClick={() => handleItemChange(opt.value)}
               className={`accessible-target flex flex-col items-center justify-center py-3 rounded-2xl border-2 transition-all font-bold text-base gap-1 ${
                 itemType === opt.value
                   ? 'border-sky-400 bg-sky-50 text-sky-700'
@@ -138,19 +141,19 @@ export default function RecordForm({ people, initial, submitLabel, onSubmit, onC
       {/* 方向選擇 */}
       <div>
         <label className="block text-sm font-bold text-stone-600 mb-2">動作方向</label>
-        <div className="grid grid-cols-3 gap-2.5">
-          {ACTION_OPTIONS.map(opt => (
+        <div className="grid grid-cols-2 gap-2.5">
+          {DIRECTIONS.map(dir => (
             <button
-              key={opt.value}
+              key={dir}
               type="button"
-              onClick={() => setActionType(opt.value)}
+              onClick={() => setActionType(dir)}
               className={`accessible-target rounded-2xl border-2 transition-all font-bold text-sm ${
-                actionType === opt.value
+                actionType === dir
                   ? 'border-sky-400 bg-sky-50 text-sky-700'
                   : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300'
               }`}
             >
-              {opt.label}
+              {actionButtonLabel(itemType, dir)}
             </button>
           ))}
         </div>

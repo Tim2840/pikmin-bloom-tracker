@@ -8,23 +8,12 @@ import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, ActionType } from '../types'
+import { ITEM_META, DIRECTIONS, actionButtonLabel, buildQuickActionLabel } from '../lib/recordLabels'
 
-const ITEM_OPTIONS: { value: ItemType; label: string; emoji: string }[] = [
-  { value: 'postcard', label: '明信片', emoji: '📮' },
-  { value: 'mushroom', label: '蘑菇', emoji: '🍄' },
+const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
+  { value: 'postcard', ...ITEM_META.postcard },
+  { value: 'mushroom', ...ITEM_META.mushroom },
 ]
-
-const ACTION_OPTIONS: { value: ActionType; label: string }[] = [
-  { value: 'sent', label: '寄出' },
-  { value: 'received', label: '收到' },
-  { value: 'helped', label: '協助打' },
-]
-
-const buildAutoLabel = (personName: string, itemType: ItemType, actionType: ActionType) => {
-  const itemLabel = itemType === 'postcard' ? '明信片' : '蘑菇'
-  const actionLabel = ACTION_OPTIONS.find(a => a.value === actionType)?.label ?? ''
-  return `${personName}：${actionLabel}${itemLabel}`
-}
 
 export default function QuickActionsPage() {
   const navigate = useNavigate()
@@ -52,7 +41,7 @@ export default function QuickActionsPage() {
   const getAutoLabel = () => {
     const person = people.find(p => p.id === personId)
     if (!person) return ''
-    return buildAutoLabel(person.nickname || person.name, itemType, actionType)
+    return buildQuickActionLabel(person.nickname || person.name, itemType, actionType)
   }
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -190,19 +179,19 @@ export default function QuickActionsPage() {
               {/* 方向選擇 */}
               <div>
                 <label className="block text-sm font-bold text-stone-600 mb-2">動作方向</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {ACTION_OPTIONS.map(opt => (
+                <div className="grid grid-cols-2 gap-2">
+                  {DIRECTIONS.map(dir => (
                     <button
-                      key={opt.value}
+                      key={dir}
                       type="button"
-                      onClick={() => setActionType(opt.value)}
+                      onClick={() => setActionType(dir)}
                       className={`accessible-target py-3 rounded-2xl border-2 transition-all font-bold text-sm ${
-                        actionType === opt.value
+                        actionType === dir
                           ? 'border-amber-400 bg-amber-50 text-amber-700'
                           : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300'
                       }`}
                     >
-                      {opt.label}
+                      {actionButtonLabel(itemType, dir)}
                     </button>
                   ))}
                 </div>
@@ -276,8 +265,8 @@ export default function QuickActionsPage() {
             <div className="space-y-3">
               {quickActions.map((action, idx) => {
                 const person = people.find(p => p.id === action.personId)
-                const itemEmoji = action.itemType === 'postcard' ? '📮' : '🍄'
-                const actionLabel = ACTION_OPTIONS.find(a => a.value === action.actionType)?.label ?? ''
+                const itemEmoji = ITEM_META[action.itemType].emoji
+                const actionLabel = actionButtonLabel(action.itemType, action.actionType)
                 return (
                   <div
                     key={action.id}
