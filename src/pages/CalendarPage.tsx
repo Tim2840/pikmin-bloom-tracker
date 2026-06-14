@@ -179,4 +179,33 @@ export default function CalendarPage() {
             {formatDateLong(selectedDate)}
             <span className="text-stone-400 text-sm font-bold">（{selectedRecords.length} 筆）</span>
           </h3>
-          {selectedRecords.length =
+          {selectedRecords.length === 0 ? (
+            <p className="text-stone-400 text-sm py-2">這天沒有任何互動紀錄。</p>
+          ) : (
+            <div className="space-y-2">
+              {selectedRecords.map(r => {
+                const meta = ITEM_META[r.itemType]
+                return (
+                  <div key={r.id} className="flex items-center gap-3 bg-white/60 rounded-2xl p-3">
+                    <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-xl shrink-0">
+                      {meta.emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-stone-800 truncate">{personName(r)}</span>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ACTION_STYLE[r.actionType]}`}>
+                          {actionFullLabel(r.itemType, r.actionType)}
+                        </span>
+                      </div>
+                      {r.note && <p className="text-xs text-stone-400 mt-0.5 truncate">{r.note}</p>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle, Plus, X } from 'lucide-react'
+import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle, Plus, X, Sun } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
-import { ITEM_META } from '../lib/recordLabels'
+import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import RecordForm, { RecordFormValues } from '../components/RecordForm'
 
 
@@ -50,7 +50,7 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { quickActions, fetchQuickActions } = useQuickActionsStore()
   const { people, fetchPeople } = usePeopleStore()
-  const { addRecord } = useRecordsStore()
+  const { records, fetchRecords, addRecord } = useRecordsStore()
 
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [tapping, setTapping] = useState<string | null>(null)
@@ -59,7 +59,11 @@ export default function HomePage() {
   useEffect(() => {
     fetchQuickActions()
     fetchPeople()
-  }, [fetchQuickActions, fetchPeople])
+    fetchRecords()
+  }, [fetchQuickActions, fetchPeople, fetchRecords])
+
+  const todayStr = getTodayDate()
+  const todayRecords = records.filter(r => r.date === todayStr)
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToast({ text, type })
@@ -120,9 +124,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Hero 區塊 */}
+      {/* Hero */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-16 mb-10">
-        {/* 左欄：主視覺文字 */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left md:flex-1">
           <div className="w-20 h-20 bg-lime-100 rounded-3xl flex items-center justify-center shadow-inner mb-6 animate-bounce">
             <span className="text-4xl">🍄</span>
@@ -143,7 +146,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* 右欄：Sprint 進度卡 */}
         <div className="glass-card rounded-3xl p-6 md:w-72 lg:w-80 shrink-0">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-amber-500" />
@@ -173,7 +175,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 快速紀錄區塊 */}
+      {/* 快速紀錄 */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
@@ -192,7 +194,6 @@ export default function HomePage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
-          {/* 手動新增紀錄按鈕（永遠顯示） */}
           <button
             onClick={() => setShowAddModal(true)}
             className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base border-2 border-dashed border-sky-300 text-sky-600 bg-sky-50 hover:bg-sky-100 transition-all active:scale-95"
@@ -200,7 +201,6 @@ export default function HomePage() {
             <Plus className="w-5 h-5" />
             新增紀錄
           </button>
-          {/* 快捷動作按鈕 */}
           {quickActions.map(action => {
             const person = people.find(p => p.id === action.personId)
             const itemEmoji = ITEM_META[action.itemType].emoji
@@ -225,7 +225,6 @@ export default function HomePage() {
               </button>
             )
           })}
-          {/* 若無快捷動作，顯示引導設定 */}
           {quickActions.length === 0 && (
             <button
               onClick={() => navigate('/people/quick-actions')}
@@ -242,4 +241,104 @@ export default function HomePage() {
       {showAddModal && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-end sm:items-center justify-center p-4"
-          onClick={(e) => { if (e.target 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false) }}
+        >
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-scale-up max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-stone-100">
+              <h2 className="text-lg font-black text-stone-800 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-sky-500" />
+                新增互動紀錄
+              </h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="accessible-target flex items-center justify-center w-9 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <RecordForm
+                people={people}
+                submitLabel="儲存紀錄"
+                onSubmit={handleAddRecord}
+                onCancel={() => setShowAddModal(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 今日互動紀錄 */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
+            <Sun className="w-5 h-5 text-amber-400" />
+            今日互動
+          </h2>
+          {todayRecords.length > 0 && (
+            <button
+              onClick={() => navigate('/records')}
+              className="text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors"
+            >
+              全部紀錄 →
+            </button>
+          )}
+        </div>
+        {todayRecords.length === 0 ? (
+          <div className="glass-card rounded-2xl px-5 py-4 text-stone-400 text-sm font-medium flex items-center gap-3">
+            <span className="text-2xl">🌱</span>
+            今天還沒有互動紀錄，快去記下第一筆吧！
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {todayRecords.map(r => {
+              const meta = ITEM_META[r.itemType]
+              const person = people.find(p => p.id === r.personId)
+              const color = person?.color || '#9CA3AF'
+              return (
+                <div key={r.id} className="glass-card rounded-2xl px-4 py-3 flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    style={{ backgroundColor: `${color}20` }}
+                  >
+                    {meta.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-stone-800 text-sm">{r.personNameSnapshot}</span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ACTION_STYLE[r.actionType]}`}>
+                        {actionFullLabel(r.itemType, r.actionType)}
+                      </span>
+                    </div>
+                    {r.note && <p className="text-xs text-stone-400 mt-0.5 truncate">{r.note}</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 功能捧徑卡片區 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {FEATURE_CARDS.map((card) => {
+          const Icon = card.icon
+          return (
+            <button
+              key={card.to}
+              onClick={() => navigate(card.to)}
+              className={`glass-card rounded-2xl p-5 text-left border ${card.borderClass} group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 w-full`}
+            >
+              <div className={`w-12 h-12 rounded-2xl ${card.bgClass} flex items-center justify-center mb-3`}>
+                <Icon className={`w-6 h-6 ${card.textClass}`} />
+              </div>
+              <h3 className={`font-extrabold text-base ${card.textClass} mb-1`}>{card.title}</h3>
+              <p className="text-stone-500 text-sm leading-relaxed">{card.desc}</p>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+

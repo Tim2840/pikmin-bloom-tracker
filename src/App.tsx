@@ -20,4 +20,7 @@ export default function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/stats" element={<StatsPage />} />
         </Routes>
- 
+      </main>
+    </Router>
+  )
+}

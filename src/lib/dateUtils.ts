@@ -66,3 +66,12 @@ export const buildMonthGrid = (year: number, month: number): DayCell[] => {
 }
 
 export const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六']
+
+// 月份切換：回傳新的 { year, month }
+export const shiftMonth = (year: number, month: number, delta: number): { year: number; month: number } => {
+  const d = addMonths(new Date(year, month, 1), delta)
+  return { year: d.getFullYear(), month: d.getMonth() }
+}
+
+export const MONTH_LABEL = (year: number, month: number): string =>
+  format(new Date(year, month, 1), 'yyyy 年 M 月', { locale: zhTW })
