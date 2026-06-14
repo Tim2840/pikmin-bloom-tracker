@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <>
       {/* 行動端：底部浮動導覽列 */}
-      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-panel rounded-2xl shadow-lg border border-white/50 px-2 py-2 z-50">
+      <nav data-piklog-chrome className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-panel rounded-2xl shadow-lg border border-white/50 px-2 py-2 z-50">
         <ul className="flex justify-around items-center">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -39,7 +39,7 @@ export default function Navbar() {
       </nav>
 
       {/* 桌面端：頂部固定導覽列 */}
-      <header className="hidden md:block w-full sticky top-0 glass-panel border-b border-white/40 shadow-sm px-8 py-4 z-50">
+      <header data-piklog-chrome className="hidden md:block w-full sticky top-0 glass-panel border-b border-white/40 shadow-sm px-8 py-4 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           {/* Logo 標題 */}
           <div className="flex items-center space-x-3 select-none">

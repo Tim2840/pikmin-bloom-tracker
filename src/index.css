@@ -63,3 +63,12 @@
   animation: scale-up 0.2s ease-out both;
 }
 
+/* 教學進行中：隱藏與導覽無關的固定/浮動 UI（Navbar、說明 ? 鈕），
+   避免 spotlight 挖空區把底部 Navbar 一起框進來 */
+body.tutorial-active [data-piklog-chrome],
+body.tutorial-active button[title="查看使用說明"] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+

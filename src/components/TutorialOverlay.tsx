@@ -53,6 +53,12 @@ export default function TutorialOverlay({
     setSpotRect({ top: r.top, left: r.left, width: r.width, height: r.height })
   }, [step])
 
+  // 教學開啟時隱藏 Navbar 與說明鈕（見 index.css），避免被 spotlight 框到
+  useEffect(() => {
+    document.body.classList.toggle('tutorial-active', isOpen)
+    return () => document.body.classList.remove('tutorial-active')
+  }, [isOpen])
+
   useEffect(() => {
     if (!isOpen || isComplete) {
       setSpotRect(null)
