@@ -1,19 +1,20 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Users, History, BarChart3, CalendarDays } from 'lucide-react'
+import { Home, Users, History, BarChart3, CalendarDays, Settings } from 'lucide-react'
 
 export default function Navbar() {
   const navItems = [
     { to: '/', label: '首頁', icon: Home },
-    { to: '/people', label: '人物管理', icon: Users },
-    { to: '/records', label: '互動紀錄', icon: History },
+    { to: '/people', label: '人物', icon: Users },
+    { to: '/records', label: '紀錄', icon: History },
     { to: '/calendar', label: '月曆', icon: CalendarDays },
-    { to: '/stats', label: '簡單統計', icon: BarChart3 },
+    { to: '/stats', label: '統計', icon: BarChart3 },
+    { to: '/settings', label: '設定', icon: Settings },
   ]
 
   return (
     <>
       {/* 行動端：底部浮動導覽列 */}
-      <nav data-piklog-chrome className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-panel rounded-2xl shadow-lg border border-white/50 px-2 py-2 z-50">
+      <nav data-piklog-chrome className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] max-w-md glass-panel rounded-2xl shadow-lg border border-white/50 px-1 py-2 z-50">
         <ul className="flex justify-around items-center">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -22,7 +23,7 @@ export default function Navbar() {
                 <NavLink
                   to={item.to}
                   className={({ isActive }) => `
-                    flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all duration-200 accessible-target
+                    flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-200 accessible-target
                     ${isActive 
                       ? 'text-lime-700 font-bold bg-lime-100/60 scale-105' 
                       : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100/50'

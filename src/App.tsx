@@ -6,6 +6,7 @@ import QuickActionsPage from './pages/QuickActionsPage'
 import RecordsPage from './pages/RecordsPage'
 import StatsPage from './pages/StatsPage'
 import CalendarPage from './pages/CalendarPage'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/stats" element={<StatsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
     </Router>
