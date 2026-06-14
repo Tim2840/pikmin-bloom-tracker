@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   History, Filter, Plus, Calendar, User, X, Edit2, Trash2,
-  Check, AlertCircle, AlertTriangle,
+  Check, AlertCircle, AlertTriangle, HelpCircle,
 } from 'lucide-react'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
@@ -9,6 +9,9 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, RecordItem } from '../types'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import RecordForm, { RecordFormValues } from '../components/RecordForm'
+import TutorialOverlay from '../components/TutorialOverlay'
+import { useTutorial } from '../hooks/useTutorial'
+import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 const formatDate = (dateStr: string) => {
   const [y, m, d] = dateStr.split('-')
@@ -96,6 +99,9 @@ export default function RecordsPage() {
   const isDBOnline = isSupabaseConfigured()
   const hasFilter = filterPersonId !== 'all' || filterItem !== 'all'
 
+  const tutSteps = TUTORIAL_STEPS.records
+  const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('records', tutSteps.length)
+
   return (
     <div className="w-full pb-4">
       {/* 頂部標題列 */}
@@ -141,7 +147,7 @@ export default function RecordsPage() {
       )}
 
       {/* 篩選工具列 */}
-      <div className="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3" data-tutorial="records-filter">
         <div className="flex items-center gap-2 text-stone-500 text-sm font-bold shrink-0">
           <Filter className="w-4 h-4" />
           篩選
@@ -184,6 +190,7 @@ export default function RecordsPage() {
       </div>
 
       {/* 列表 / 空狀態 */}
+      <div data-tutorial="records-list">
       {loading && records.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => <div key={i} className="h-20 bg-stone-200/50 rounded-2xl animate-pulse" />)}
@@ -259,6 +266,7 @@ export default function RecordsPage() {
           })}
         </div>
       )}
+      </div>{/* end records-list */}
 
       {/* 新增 Modal */}
       {showAdd && (
@@ -333,6 +341,26 @@ export default function RecordsPage() {
           </div>
         </div>
       )}
+      {/* 說明按鈕 */}
+      <button
+        onClick={startTutorial}
+        className="fixed right-4 bottom-24 md:bottom-6 z-50 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        title="查看使用說明"
+      >
+        <HelpCircle className="w-5 h-5" />
+      </button>
+
+      {/* 教學遮罩 */}
+      <TutorialOverlay
+        steps={tutSteps}
+        currentStep={tutStep}
+        isOpen={tutOpen}
+        isComplete={tutDone}
+        completionMsg={TUTORIAL_COMPLETE.records}
+        onNext={tutNext}
+        onSkip={tutSkip}
+        onCompleteClose={tutClose}
+      />
     </div>
   )
 }

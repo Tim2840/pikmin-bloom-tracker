@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox } from 'lucide-react'
+import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox, HelpCircle } from 'lucide-react'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { RecordItem } from '../types'
 import { RANGE_OPTIONS, RangeKey, isInRange, formatDate } from '../lib/dateUtils'
+import TutorialOverlay from '../components/TutorialOverlay'
+import { useTutorial } from '../hooks/useTutorial'
+import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 interface PersonStat {
   id: string | null
@@ -88,6 +91,9 @@ export default function StatsPage() {
   const top5 = personStats.slice(0, 5)
   const isEmpty = totalInteractions === 0
 
+  const tutSteps = TUTORIAL_STEPS.stats
+  const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('stats', tutSteps.length)
+
   return (
     <div className="w-full pb-4">
       {/* 頂部標題 */}
@@ -99,7 +105,7 @@ export default function StatsPage() {
       </div>
 
       {/* 時間範圍切換 */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6" data-tutorial="stats-range">
         {RANGE_OPTIONS.map(opt => (
           <button
             key={opt.key}
@@ -134,6 +140,7 @@ export default function StatsPage() {
         })}
       </div>
 
+      <div data-tutorial="stats-list">
       {isEmpty ? (
         /* 空狀態 */
         <div className="glass-card rounded-3xl p-12 text-center">
@@ -198,6 +205,28 @@ export default function StatsPage() {
           </div>
         </div>
       )}
+      </div>{/* end stats-list */}
+
+      {/* 說明按鈕 */}
+      <button
+        onClick={startTutorial}
+        className="fixed right-4 bottom-24 md:bottom-6 z-50 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        title="查看使用說明"
+      >
+        <HelpCircle className="w-5 h-5" />
+      </button>
+
+      {/* 教學遣罩 */}
+      <TutorialOverlay
+        steps={tutSteps}
+        currentStep={tutStep}
+        isOpen={tutOpen}
+        isComplete={tutDone}
+        completionMsg={TUTORIAL_COMPLETE.stats}
+        onNext={tutNext}
+        onSkip={tutSkip}
+        onCompleteClose={tutClose}
+      />
     </div>
   )
 }

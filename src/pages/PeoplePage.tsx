@@ -5,8 +5,11 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import {
   UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
   Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield,
-  ChevronUp, ChevronDown, Zap,
+  ChevronUp, ChevronDown, Zap, HelpCircle,
 } from 'lucide-react'
+import TutorialOverlay from '../components/TutorialOverlay'
+import { useTutorial } from '../hooks/useTutorial'
+import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 // 預設的高對比亮麗 Pikmin 色系，長輩易點選與辨識
 const COLOR_PRESETS = [
@@ -138,6 +141,9 @@ export default function PeoplePage() {
 
   const isDBOnline = isSupabaseConfigured()
 
+  const tutSteps = TUTORIAL_STEPS.people
+  const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('people', tutSteps.length)
+
   return (
     <div className="pb-12">
       {/* 頂部標題 */}
@@ -149,6 +155,7 @@ export default function PeoplePage() {
           <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單（最多 20 位）</p>
         </div>
         <button
+          data-tutorial="people-qa-btn"
           onClick={() => navigate('/people/quick-actions')}
           className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-4 py-2.5 rounded-2xl transition-all shadow-md shadow-amber-500/20 text-sm shrink-0"
         >
@@ -192,7 +199,7 @@ export default function PeoplePage() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         
         {/* 新增人物表單 (左側欄，佔 5/12) */}
-        <section className="md:col-span-5 glass-card rounded-3xl p-5 shadow-sm">
+        <section className="md:col-span-5 glass-card rounded-3xl p-5 shadow-sm" data-tutorial="people-form">
           <h2 className="text-lg font-extrabold text-stone-850 mb-4 flex items-center">
             <UserPlus className="w-5 h-5 mr-2 text-lime-600" />
             建立新人物
@@ -226,7 +233,7 @@ export default function PeoplePage() {
             </div>
 
             {/* 色彩選擇器 */}
-            <div>
+            <div data-tutorial="people-colors">
               <label className="block text-sm font-bold text-stone-600 mb-2">
                 代表顏色 <span className="text-stone-400 text-xs font-normal">(大按鈕易於點選)</span>
               </label>
@@ -307,7 +314,7 @@ export default function PeoplePage() {
         </section>
 
         {/* 人物名冊清單 (右側欄，佔 7/12) */}
-        <section className="md:col-span-7 mt-8 md:mt-0">
+        <section className="md:col-span-7 mt-8 md:mt-0" data-tutorial="people-list">
           <h2 className="text-lg font-extrabold text-stone-850 mb-4">
             👥 好友名冊 ({people.length} 人)
           </h2>
@@ -508,6 +515,27 @@ export default function PeoplePage() {
           </div>
         </div>
       )}
+
+      {/* 說明按鈕 */}
+      <button
+        onClick={startTutorial}
+        className="fixed right-4 bottom-24 md:bottom-6 z-50 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        title="查看使用說明"
+      >
+        <HelpCircle className="w-5 h-5" />
+      </button>
+
+      {/* 教學遮罩 */}
+      <TutorialOverlay
+        steps={tutSteps}
+        currentStep={tutStep}
+        isOpen={tutOpen}
+        isComplete={tutDone}
+        completionMsg={TUTORIAL_COMPLETE.people}
+        onNext={tutNext}
+        onSkip={tutSkip}
+        onCompleteClose={tutClose}
+      />
 
       {/* 刪除確認 Dialog 彈窗 (長輩防誤觸) */}
       {deletingPersonId && (

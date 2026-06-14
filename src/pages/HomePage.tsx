@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle, Plus, X, Sun } from 'lucide-react'
+import { Sparkles, Users, History, BarChart3, ArrowRight, Zap, Check, AlertCircle, Plus, X, Sun, HelpCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import RecordForm, { RecordFormValues } from '../components/RecordForm'
+import TutorialOverlay from '../components/TutorialOverlay'
+import { useTutorial } from '../hooks/useTutorial'
+import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 
 const FEATURE_CARDS = [
@@ -55,6 +58,9 @@ export default function HomePage() {
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [tapping, setTapping] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+
+  const tutSteps = TUTORIAL_STEPS.home
+  const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('home', tutSteps.length)
 
   useEffect(() => {
     fetchQuickActions()
@@ -176,7 +182,7 @@ export default function HomePage() {
       </div>
 
       {/* 快速紀錄 */}
-      <div className="mb-10">
+      <div className="mb-10" data-tutorial="home-quick">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-500" />
@@ -195,6 +201,7 @@ export default function HomePage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <button
+            data-tutorial="home-add-btn"
             onClick={() => setShowAddModal(true)}
             className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base border-2 border-dashed border-sky-300 text-sky-600 bg-sky-50 hover:bg-sky-100 transition-all active:scale-95"
           >
@@ -269,7 +276,7 @@ export default function HomePage() {
       )}
 
       {/* 今日互動紀錄 */}
-      <div className="mb-10">
+      <div className="mb-10" data-tutorial="home-today">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-extrabold text-stone-700 flex items-center gap-2">
             <Sun className="w-5 h-5 text-amber-400" />
@@ -320,7 +327,7 @@ export default function HomePage() {
       </div>
 
       {/* 功能捧徑卡片區 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" data-tutorial="home-features">
         {FEATURE_CARDS.map((card) => {
           const Icon = card.icon
           return (
@@ -338,7 +345,26 @@ export default function HomePage() {
           )
         })}
       </div>
+      {/* 說明按鈕 */}
+      <button
+        onClick={startTutorial}
+        className="fixed right-4 bottom-24 md:bottom-6 z-50 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        title="查看使用說明"
+      >
+        <HelpCircle className="w-5 h-5" />
+      </button>
+
+      {/* 教學遮罩 */}
+      <TutorialOverlay
+        steps={tutSteps}
+        currentStep={tutStep}
+        isOpen={tutOpen}
+        isComplete={tutDone}
+        completionMsg={TUTORIAL_COMPLETE.home}
+        onNext={tutNext}
+        onSkip={tutSkip}
+        onCompleteClose={tutClose}
+      />
     </div>
   )
 }
-
