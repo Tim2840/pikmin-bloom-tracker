@@ -38,6 +38,7 @@ export default function TutorialOverlay({
 
   const step = steps[currentStep]
   const hasSelector = !!step?.selector
+  const isHelpStep = step?.selector === '[data-tutorial="help-btn"]'
 
   const updateRect = useCallback(() => {
     if (!step?.selector) {
@@ -53,11 +54,16 @@ export default function TutorialOverlay({
     setSpotRect({ top: r.top, left: r.left, width: r.width, height: r.height })
   }, [step])
 
-  // 教學開啟時隱藏 Navbar 與說明鈕（見 index.css），避免被 spotlight 框到
+  // 教學開啟時隱藏 Navbar 與說明鈕（見 index.css），避免被 spotlight 框到；
+  // 但走到「指向 ? 鈕」那一步時讓 ? 重新顯示，才能把光圈打在它身上。
   useEffect(() => {
     document.body.classList.toggle('tutorial-active', isOpen)
-    return () => document.body.classList.remove('tutorial-active')
-  }, [isOpen])
+    document.body.classList.toggle('tutorial-show-help', isOpen && isHelpStep && !isComplete)
+    return () => {
+      document.body.classList.remove('tutorial-active')
+      document.body.classList.remove('tutorial-show-help')
+    }
+  }, [isOpen, isHelpStep, isComplete])
 
   useEffect(() => {
     if (!isOpen || isComplete) {

@@ -72,3 +72,8 @@ body.tutorial-active button[title="查看使用說明"] {
   transition: opacity 0.2s ease;
 }
 
+/* 教學最後一步「指向 ? 鈕」時，讓 ? 重新顯示以接受 spotlight */
+body.tutorial-show-help button[title="查看使用說明"] {
+  opacity: 1;
+}
+

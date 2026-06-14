@@ -359,6 +359,7 @@ export default function HomePage() {
       {/* 說明按鈕 */}
       <button
         onClick={startTutorial}
+        data-tutorial="help-btn"
         className="fixed right-4 top-4 md:top-20 z-40 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
         title="查看使用說明"
       >
