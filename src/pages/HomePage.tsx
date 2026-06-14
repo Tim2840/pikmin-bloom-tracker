@@ -70,6 +70,9 @@ export default function HomePage() {
 
   const todayStr = getTodayDate()
   const todayRecords = records.filter(r => r.date === todayStr)
+  const monthPrefix = todayStr.slice(0, 7) // YYYY-MM
+  const monthRecords = records.filter(r => r.date.startsWith(monthPrefix))
+  const monthFriendCount = new Set(monthRecords.map(r => r.personId ?? r.personNameSnapshot)).size
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToast({ text, type })
@@ -141,7 +144,7 @@ export default function HomePage() {
             <span className="text-lime-600">紀錄器</span>
           </h1>
           <p className="text-stone-500 text-base md:text-lg max-w-xs md:max-w-sm leading-relaxed mb-6">
-            長輩友善的明信片與打蘑菇互動紀錄工具，輕鬆一按就記好！
+            明信片與打蘑菇互動紀錄，輕鬆一按就記好！
           </p>
           <button
             onClick={() => navigate('/people')}
@@ -155,29 +158,37 @@ export default function HomePage() {
         <div className="glass-card rounded-3xl p-6 md:w-72 lg:w-80 shrink-0">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            <h2 className="text-base font-bold text-stone-700">目前進度</h2>
+            <h2 className="text-base font-bold text-stone-700">本月足跡</h2>
           </div>
-          <div className="space-y-3">
-            {[
-              { label: '基礎架構', done: true },
-              { label: '人物管理 CRUD', done: true },
-              { label: '快捷動作', done: true },
-              { label: '互動紀錄功能', done: true },
-              { label: '統計分析', done: true },
-              { label: '月曆檢視', done: true },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                  item.done ? 'bg-lime-500 text-white' : 'bg-stone-200 text-stone-400'
-                }`}>
-                  {item.done ? '✓' : '○'}
-                </span>
-                <span className={`text-sm font-medium ${item.done ? 'text-stone-700' : 'text-stone-400'}`}>
-                  {item.label}
+          {monthRecords.length === 0 ? (
+            <p className="text-stone-500 text-base leading-relaxed">
+              這個月還沒有紀錄，快來記第一筆吧！🌱
+            </p>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-end justify-between">
+                <span className="text-stone-500 text-base">本月互動</span>
+                <span className="text-3xl font-black text-lime-600 tabular-nums">
+                  {monthRecords.length}
+                  <span className="text-base font-bold text-stone-400 ml-1">次</span>
                 </span>
               </div>
-            ))}
-          </div>
+              <div className="flex items-end justify-between">
+                <span className="text-stone-500 text-base">聯絡好友</span>
+                <span className="text-3xl font-black text-sky-600 tabular-nums">
+                  {monthFriendCount}
+                  <span className="text-base font-bold text-stone-400 ml-1">位</span>
+                </span>
+              </div>
+              <div className="flex items-end justify-between">
+                <span className="text-stone-500 text-base">今天已記</span>
+                <span className="text-3xl font-black text-violet-600 tabular-nums">
+                  {todayRecords.length}
+                  <span className="text-base font-bold text-stone-400 ml-1">筆</span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -348,7 +359,7 @@ export default function HomePage() {
       {/* 說明按鈕 */}
       <button
         onClick={startTutorial}
-        className="fixed right-4 bottom-24 md:bottom-6 z-40 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        className="fixed right-4 top-4 md:top-20 z-40 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
         title="查看使用說明"
       >
         <HelpCircle className="w-5 h-5" />
