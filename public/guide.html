@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PikLog 使用說明</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: #fafaf9;
+      color: #292524;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    /* ── 頂部標題 ── */
+    .hero {
+      background: linear-gradient(135deg, #65a30d 0%, #84cc16 100%);
+      color: white;
+      text-align: center;
+      padding: 48px 24px 56px;
+    }
+    .hero-icon { font-size: 64px; margin-bottom: 16px; }
+    .hero h1 { font-size: 2rem; font-weight: 900; letter-spacing: -0.5px; }
+    .hero p { font-size: 1.1rem; opacity: 0.9; margin-top: 8px; }
+
+    /* ── 目錄 ── */
+    .toc {
+      background: white;
+      border-bottom: 1px solid #e7e5e4;
+      padding: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .toc a {
+      background: #f5f5f4;
+      color: #44403c;
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: background 0.15s;
+    }
+    .toc a:hover { background: #e7e5e4; }
+
+    /* ── 主內容 ── */
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* ── 區塊 ── */
+    .section {
+      margin-top: 48px;
+      scroll-margin-top: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .section-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .section-icon.green  { background: #ecfccb; }
+    .section-icon.blue   { background: #e0f2fe; }
+    .section-icon.amber  { background: #fef9c3; }
+    .section-icon.violet { background: #ede9fe; }
+    .section-icon.rose   { background: #ffe4e6; }
+    .section-icon.stone  { background: #f5f5f4; }
+
+    .section h2 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #1c1917;
+    }
+
+    /* ── 步驟卡片 ── */
+    .steps { display: flex; flex-direction: column; gap: 14px; }
+    .step {
+      background: white;
+      border-radius: 16px;
+      padding: 18px 20px;
+      border: 1px solid #e7e5e4;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #65a30d;
+      color: white;
+      font-weight: 900;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content strong { display: block; font-size: 1rem; font-weight: 800; color: #1c1917; margin-bottom: 4px; }
+    .step-content p { color: #57534e; font-size: 0.95rem; }
+
+    /* ── 提示方塊 ── */
+    .tip {
+      background: #f0fdf4;
+      border-left: 4px solid #65a30d;
+      border-radius: 0 12px 12px 0;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #166534;
+    }
+    .tip strong { font-weight: 800; }
+
+    .warn {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 12px 12px 0;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #92400e;
+    }
+
+    /* ── 功能總覽格 ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .feature-card {
+      background: white;
+      border: 1px solid #e7e5e4;
+      border-radius: 16px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .feature-card .icon { font-size: 32px; margin-bottom: 10px; }
+    .feature-card strong { display: block; font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+    .feature-card p { font-size: 0.85rem; color: #78716c; line-height: 1.5; }
+
+    /* ── 標籤徽章 ── */
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .badge.sent     { background: #fef9c3; color: #92400e; }
+    .badge.received { background: #f0fdf4; color: #166534; }
+
+    /* ── 分隔線 ── */
+    hr { border: none; border-top: 1px solid #e7e5e4; margin: 48px 0 0; }
+
+    /* ── 頁尾 ── */
+    footer {
+      text-align: center;
+      color: #a8a29e;
+      font-size: 0.85rem;
+      padding: 32px 24px;
+    }
+
+    /* ── 手機調整 ── */
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.6rem; }
+      .features { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 頂部 -->
+<div class="hero">
+  <div class="hero-icon">🍄</div>
+  <h1>PikLog 使用說明</h1>
+  <p>記錄明信片收發與打蘑菇互動的小工具</p>
+</div>
+
+<!-- 快速導覽 -->
+<div class="toc">
+  <a href="#overview">📋 功能總覽</a>
+  <a href="#people">👥 新增好友</a>
+  <a href="#record">✏️ 記錄互動</a>
+  <a href="#quick">⚡ 快速紀錄</a>
+  <a href="#history">📜 查看紀錄</a>
+  <a href="#calendar">📅 月曆</a>
+  <a href="#stats">📊 統計</a>
+  <a href="#install">📲 加入主畫面</a>
+</div>
+
+<div class="container">
+
+  <!-- 功能總覽 -->
+  <div class="section" id="overview">
+    <div class="section-header">
+      <div class="section-icon stone">📋</div>
+      <h2>功能總覽</h2>
+    </div>
+    <div class="features">
+      <div class="feature-card">
+        <div class="icon">👥</div>
+        <strong>人物管理</strong>
+        <p>新增好友，設定顏色與圖標</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <strong>快速紀錄</strong>
+        <p>一鍵記錄常用互動</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📜</div>
+        <strong>互動紀錄</strong>
+        <p>查看所有歷史記錄</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📅</div>
+        <strong>月曆檢視</strong>
+        <p>用月曆瀏覽每天互動</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📊</div>
+        <strong>統計分析</strong>
+        <p>查看與好友的互動頻率</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增好友 -->
+  <hr />
+  <div class="section" id="people">
+    <div class="section-header">
+      <div class="section-icon blue">👥</div>
+      <h2>第一步：新增好友</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:20px;">要記錄互動，必須先把好友加進來。</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>點底部導覽的「人物」👥</strong>
+          <p>進入人物管理頁面。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>點右上角的「＋ 新增」</strong>
+          <p>開啟新增好友表單。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>填入名稱</strong>
+          <p>輸入好友的名字或暱稱。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>選擇顏色與圖標（可選）</strong>
+          <p>幫好友選一個代表色和喜歡的圖示，方便辨認。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>點「儲存」</strong>
+          <p>好友加入完成，之後記錄時就可以選到他了。</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip">💡 <strong>小提示：</strong>好友可以隨時編輯或刪除，點進好友卡片就能看到選項。</div>
+  </div>
+
+  <!-- 記錄互動 -->
+  <hr />
+  <div class="section" id="record">
+    <div class="section-header">
+      <div class="section-icon green">✏️</div>
+      <h2>記錄互動</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:16px;">每次與好友有明信片或蘑菇互動，就記一筆。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>在首頁點「＋ 新增紀錄」</strong>
+          <p>或到底部「紀錄」頁也可以新增。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>選擇好友</strong>
+          <p>從下拉清單選出這次互動的對象。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>選互動類型</strong>
+          <p>
+            📮 <strong>明信片</strong> 或 🍄 <strong>蘑菇</strong>
+          </p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>選方向</strong>
+          <p>
+            <span class="badge sent">→ 寄給對方 / 我邀請他</span>&nbsp;
+            <span class="badge received">← 對方寄來 / 他邀請我</span>
+          </p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>確認日期，加備注（可選）</strong>
+          <p>預設為今天，也可以改成其他日期補登。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <strong>點「儲存紀錄」</strong>
+          <p>完成！畫面會出現綠色提示確認成功。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快速紀錄 -->
+  <hr />
+  <div class="section" id="quick">
+    <div class="section-header">
+      <div class="section-icon amber">⚡</div>
+      <h2>快速紀錄（常用互動一鍵完成）</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:16px;">如果你經常和同一位好友做相同的互動，可以設定「快捷動作」，下次只需要按一個按鈕。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>進入「人物」頁面，點「管理快捷動作」</strong>
+          <p>或在首頁快速紀錄區點「設定快捷動作」。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>點「＋ 新增快捷動作」</strong>
+          <p>選好友、互動類型、方向，儲存。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>回首頁，按對應的彩色按鈕</strong>
+          <p>直接記錄！不需要再填表單。</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip">💡 <strong>建議：</strong>把最常互動的好友設成快捷動作，每天記錄只要幾秒。</div>
+  </div>
+
+  <!-- 查看紀錄 -->
+  <hr />
+  <div class="section" id="history">
+    <div class="section-header">
+      <div class="section-icon violet">📜</div>
+      <h2>查看歷史紀錄</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>點底部導覽的「紀錄」📜</strong>
+          <p>顯示所有互動記錄，從最新到最舊排列。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>可以依好友或類型篩選</strong>
+          <p>頁面上方有篩選欄，找特定好友的紀錄很方便。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>點某筆紀錄可以編輯或刪除</strong>
+          <p>記錯了不用擔心，可以隨時修正。刪除需要再確認一次才會執行。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 月曆 -->
+  <hr />
+  <div class="section" id="calendar">
+    <div class="section-header">
+      <div class="section-icon green">📅</div>
+      <h2>月曆檢視</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:16px;">用月曆方式看哪幾天有互動，點日期查看當天明細。</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>點底部導覽的「月曆」📅</strong>
+          <p>顯示當月的互動分布。有紀錄的日期會出現彩色圓點。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>點任何一天</strong>
+          <p>下方展開當天的互動明細。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>左右切換月份</strong>
+          <p>點 ‹ › 箭頭切換上個月或下個月，也可以點「回到今天」直接跳回當月。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 統計 -->
+  <hr />
+  <div class="section" id="stats">
+    <div class="section-header">
+      <div class="section-icon rose">📊</div>
+      <h2>統計分析</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:16px;">查看你和每位好友的互動頻率，了解最近的聯絡狀況。</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>點底部導覽的「統計」📊</strong>
+          <p>顯示各好友的互動次數與比例。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>切換時間範圍</strong>
+          <p>可以選「本月」、「近 30 天」或「全部」來調整統計範圍。</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip">💡 互動次數最多的好友會排在最前面。</div>
+  </div>
+
+  <!-- 加入主畫面 -->
+  <hr />
+  <div class="section" id="install">
+    <div class="section-header">
+      <div class="section-icon blue">📲</div>
+      <h2>加入主畫面</h2>
+    </div>
+    <p style="color:#57534e; margin-bottom:20px;">把 PikLog 加到手機桌面，之後就可以直接點開，不用每次找瀏覽器。</p>
+
+    <!-- iOS -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:24px;">🍎</span>
+        <strong style="font-size:1.05rem;color:#1c1917;">iPhone / iPad（Safari）</strong>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>用 Safari 開啟 PikLog 網址</strong>
+            <p>必須用 Safari 才有「加入主畫面」的選項，Chrome、Line 瀏覽器不支援此功能。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>點畫面下方中間的「分享」按鈕</strong>
+            <p>圖示是一個方形往上冒出箭頭 ⬆︎，在網址列的正下方。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>從選單裡找「加入主畫面」</strong>
+            <p>圖示是一個方形加號 ＋□。可能需要稍微往下捲動選單才看得到。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>點右上角「新增」</strong>
+            <p>完成！桌面上會出現 PikLog 的圖示，之後直接點它開啟。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Android -->
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:24px;">🤖</span>
+        <strong style="font-size:1.05rem;color:#1c1917;">Android（Chrome）</strong>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>用 Chrome 開啟 PikLog 網址</strong>
+            <p>建議使用 Google Chrome，其他瀏覽器步驟可能不同。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>點右上角的「⋮」三點選單</strong>
+            <p>在網址列的最右側。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>選「新增至主畫面」或「安裝應用程式」</strong>
+            <p>兩種文字都有可能出現，看手機版本而定。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <strong>點「新增」或「安裝」確認</strong>
+            <p>完成！主畫面上會出現 PikLog 圖示。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">💡 加入主畫面後開啟，介面會去掉瀏覽器的網址列，用起來更像原生 App。</div>
+    <div class="warn">⚠️ 目前資料存在裝置本地，清除瀏覽器資料或換一支手機，紀錄不會跟著轉移。</div>
+  </div>
+
+  <!-- 常見問題 -->
+  <hr />
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon amber">❓</div>
+      <h2>常見問題</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">Q</div>
+        <div class="step-content">
+          <strong>記錯了可以改嗎？</strong>
+          <p>可以。進入「紀錄」頁，點那筆紀錄，選「編輯」就能修改。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">Q</div>
+        <div class="step-content">
+          <strong>好友名字打錯了怎麼辦？</strong>
+          <p>到「人物」頁，點好友卡片，選「編輯」就能改名字。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">Q</div>
+        <div class="step-content">
+          <strong>資料會消失嗎？</strong>
+          <p>資料存在你的裝置本地，不會自動消失。但清除瀏覽器資料，或換手機，記錄就找不回來了。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  PikLog 使用說明 · 如有問題請聯繫管理員
+</footer>
+
+</body>
+</html>
