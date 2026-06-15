@@ -4,11 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
+import { useAuthStore } from '../stores/useAuthStore'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import { todayStr } from '../lib/dateUtils'
+import { isSupabaseConfigured } from '../lib/supabase'
 import { getHomeStats, resolvePersonColor } from '../services/recordService'
 import { RecordFormValues } from '../types'
 import RecordForm from '../components/RecordForm'
+import BackupReminderModal, { hasSeenBackupReminder } from '../components/BackupReminderModal'
+import EmailBackupModal from '../components/EmailBackupModal'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
@@ -52,10 +56,13 @@ export default function HomePage() {
   const { quickActions, fetchQuickActions } = useQuickActionsStore()
   const { people, fetchPeople } = usePeopleStore()
   const { records, fetchRecords, addRecord } = useRecordsStore()
+  const { isAnonymous, loading: authLoading } = useAuthStore()
 
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [tapping, setTapping] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showBackupReminder, setShowBackupReminder] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
 
   const tutSteps = TUTORIAL_STEPS.home
   const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('home', tutSteps.length)
@@ -65,6 +72,13 @@ export default function HomePage() {
     fetchPeople()
     fetchRecords()
   }, [fetchQuickActions, fetchPeople, fetchRecords])
+
+  // 首次啟動且為匿名帳號時顯示備份提醒
+  useEffect(() => {
+    if (!authLoading && isAnonymous && isSupabaseConfigured() && !hasSeenBackupReminder()) {
+      setShowBackupReminder(true)
+    }
+  }, [authLoading, isAnonymous])
 
   const today = todayStr()
   const todayRecords = records.filter(r => r.date === today)
@@ -119,6 +133,15 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
+      {/* 首次備份提醒 Modal */}
+      {showBackupReminder && (
+        <BackupReminderModal
+          onSetupNow={() => { setShowBackupReminder(false); setShowEmailModal(true) }}
+          onLater={() => setShowBackupReminder(false)}
+        />
+      )}
+      {showEmailModal && <EmailBackupModal onClose={() => setShowEmailModal(false)} />}
+
       {/* Toast */}
       {toast && (
         <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-50 flex items-center transition-all ${
