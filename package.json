@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "screenshot:setup": "npm i --no-save @sparticuz/chromium puppeteer-core",
+    "screenshot": "vite build && node scripts/screenshot.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
