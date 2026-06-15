@@ -1,0 +1,123 @@
+import { useState } from 'react'
+import { Mail, X, Check, AlertCircle, Loader2 } from 'lucide-react'
+import { linkEmail } from '../lib/auth'
+
+interface Props {
+  onClose: () => void
+}
+
+export default function EmailBackupModal({ onClose }: Props) {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+    setStatus('loading')
+    const { error } = await linkEmail(email.trim())
+    if (error) {
+      setErrorMsg(error)
+      setStatus('error')
+    } else {
+      setStatus('sent')
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-scale-up">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-stone-100">
+          <h2 className="text-lg font-black text-stone-800 flex items-center gap-2">
+            <Mail className="w-5 h-5 text-sky-500" />
+            設定 Email 備份
+          </h2>
+          <button
+            onClick={onClose}
+            className="accessible-target flex items-center justify-center w-9 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-500 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5">
+          {status === 'sent' ? (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 bg-lime-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-lime-600" />
+              </div>
+              <h3 className="text-xl font-black text-stone-800 mb-2">確認信已寄出！</h3>
+              <p className="text-stone-600 text-base leading-relaxed mb-1">
+                請到 <span className="font-bold text-sky-700">{email}</span> 收信。
+              </p>
+              <p className="text-stone-500 text-sm leading-relaxed mb-6">
+                點信中的連結後，這台裝置的資料就會與你的 Email 綁定，
+                之後換裝置登入就能還原所有紀錄。
+              </p>
+              <button
+                onClick={onClose}
+                className="accessible-target w-full h-12 rounded-2xl bg-lime-600 text-white font-extrabold text-lg hover:bg-lime-700 transition-colors"
+              >
+                好，我去收信
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <p className="text-stone-600 text-base leading-relaxed">
+                設定 Email 後，換裝置或清除瀏覽器時可以透過 Email 連結還原所有資料。
+              </p>
+              <p className="text-stone-500 text-sm leading-relaxed bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+                ⚠️ 設定前請先確認你能收到這個 Email，設定後需要點信中的確認連結才會生效。
+              </p>
+
+              {status === 'error' && (
+                <div className="flex items-start gap-2 text-rose-700 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium">{errorMsg}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-2">
+                  Email 地址 <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setStatus('idle') }}
+                  placeholder="例如：yourname@gmail.com"
+                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white text-base text-stone-800"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 h-12 rounded-xl bg-stone-100 text-stone-600 font-bold hover:bg-stone-200 transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="flex-1 h-12 rounded-xl bg-sky-600 text-white font-extrabold hover:bg-sky-700 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {status === 'loading'
+                    ? <Loader2 className="w-5 h-5 animate-spin" />
+                    : <Mail className="w-5 h-5" />
+                  }
+                  {status === 'loading' ? '傳送中…' : '傳送確認信'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

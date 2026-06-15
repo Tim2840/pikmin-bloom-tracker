@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { QuickAction } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { getSessionUserId } from '../lib/auth'
 
 interface QuickActionsState {
   quickActions: QuickAction[]
@@ -46,10 +47,10 @@ export const useQuickActionsStore = create<QuickActionsState>((set) => ({
     }
 
     try {
-      const { data, error } = await supabase
-        .from('quick_actions')
-        .select('*')
-        .order('sort_order', { ascending: true })
+      const userId = await getSessionUserId()
+      let query = supabase.from('quick_actions').select('*').order('sort_order', { ascending: true })
+      if (userId) query = query.eq('user_id', userId)
+      const { data, error } = await query
 
       if (error) throw error
 
@@ -89,8 +90,10 @@ export const useQuickActionsStore = create<QuickActionsState>((set) => ({
     }
 
     try {
+      const userId = await getSessionUserId()
       const { error } = await supabase.from('quick_actions').insert([{
         id,
+        user_id: userId,
         label: data.label,
         person_id: data.personId,
         item_type: data.itemType,

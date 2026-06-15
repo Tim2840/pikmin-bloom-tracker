@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Person } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { getSessionUserId } from '../lib/auth'
 
 interface PeopleState {
   people: Person[]
@@ -49,10 +50,10 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     }
 
     try {
-      const { data, error } = await supabase
-        .from('persons')
-        .select('*')
-        .order('sort_order', { ascending: true })
+      const userId = await getSessionUserId()
+      let query = supabase.from('persons').select('*').order('sort_order', { ascending: true })
+      if (userId) query = query.eq('user_id', userId)
+      const { data, error } = await query
 
       if (error) throw error
 
@@ -111,10 +112,12 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     }
 
     try {
+      const userId = await getSessionUserId()
       const { data, error } = await supabase
         .from('persons')
         .insert([{
           id: newPersonId,
+          user_id: userId,
           name,
           nickname: nickname || null,
           color: color || '#6B7280',

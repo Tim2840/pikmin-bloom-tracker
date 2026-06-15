@@ -3,10 +3,14 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { applyFontScale, getLocalSettings } from './stores/useSettingsStore'
+import { useAuthStore } from './stores/useAuthStore'
 import './lib/pwaInstall' // 早期註冊 beforeinstallprompt 監聽
 
 // 開機即套用使用者的介面縮放，避免畫面先以預設大小閃一下
 applyFontScale(getLocalSettings().fontScale)
+
+// 啟動 auth session（匿名或已登入），不阻塞渲染
+useAuthStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

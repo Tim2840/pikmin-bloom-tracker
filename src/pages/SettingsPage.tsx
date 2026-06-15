@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
+import { useAuthStore } from '../stores/useAuthStore'
+import { isSupabaseConfigured } from '../lib/supabase'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
+import EmailBackupModal from '../components/EmailBackupModal'
 
 const PRESETS = [
   { label: '小', sub: '90%', value: 0.9 },
@@ -13,6 +16,9 @@ const PRESETS = [
 export default function SettingsPage() {
   const { settings, setFontScale, reset } = useSettingsStore()
   const scale = settings.fontScale
+  const { user, isAnonymous } = useAuthStore()
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const dbEnabled = isSupabaseConfigured()
 
   // 追蹤 PWA 可安裝狀態
   const [installable, setInstallable] = useState(canInstall())
@@ -27,6 +33,7 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full pb-4">
+      {showEmailModal && <EmailBackupModal onClose={() => setShowEmailModal(false)} />}
       {/* 標題 */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-black text-stone-800 tracking-tight flex items-center gap-2">
@@ -95,6 +102,39 @@ export default function SettingsPage() {
           </button>
         </div>
       </section>
+
+      {/* 雲端備份 */}
+      {dbEnabled && (
+        <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">
+          <h2 className="text-lg font-extrabold text-stone-800 mb-1 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-lime-600" /> 雲端備份與同步
+          </h2>
+          {isAnonymous || !user ? (
+            <>
+              <p className="text-stone-500 text-base mb-4 leading-relaxed">
+                設定 Email 後，換手機或清除瀏覽器時可透過 Email 連結還原所有紀錄。
+              </p>
+              <p className="text-amber-700 text-sm font-medium bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
+                ⚠️ 目前為「本機帳號」模式。清除瀏覽器資料或換裝置前，請先設定 Email 備份。
+              </p>
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="accessible-target inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-base shadow-md transition-all active:scale-95"
+              >
+                <Mail className="w-5 h-5" /> 設定 Email 備份
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-2xl p-4">
+              <CheckCircle2 className="w-6 h-6 text-lime-600 shrink-0" />
+              <div>
+                <p className="font-bold text-lime-800 text-base">已設定 Email 備份</p>
+                <p className="text-lime-700 text-sm">{user.email}</p>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* 加入主畫面 */}
       <section className="glass-card rounded-3xl p-5 md:p-6 max-w-xl">
