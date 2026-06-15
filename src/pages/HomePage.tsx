@@ -5,7 +5,10 @@ import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
-import RecordForm, { RecordFormValues } from '../components/RecordForm'
+import { todayStr } from '../lib/dateUtils'
+import { getHomeStats, resolvePersonColor } from '../services/recordService'
+import { RecordFormValues } from '../types'
+import RecordForm from '../components/RecordForm'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
@@ -44,11 +47,6 @@ const FEATURE_CARDS = [
   },
 ]
 
-const getTodayDate = () => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
 export default function HomePage() {
   const navigate = useNavigate()
   const { quickActions, fetchQuickActions } = useQuickActionsStore()
@@ -68,11 +66,9 @@ export default function HomePage() {
     fetchRecords()
   }, [fetchQuickActions, fetchPeople, fetchRecords])
 
-  const todayStr = getTodayDate()
-  const todayRecords = records.filter(r => r.date === todayStr)
-  const monthPrefix = todayStr.slice(0, 7) // YYYY-MM
-  const monthRecords = records.filter(r => r.date.startsWith(monthPrefix))
-  const monthFriendCount = new Set(monthRecords.map(r => r.personId ?? r.personNameSnapshot)).size
+  const today = todayStr()
+  const todayRecords = records.filter(r => r.date === today)
+  const { monthCount, monthFriendCount } = getHomeStats(records, today)
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToast({ text, type })
@@ -91,7 +87,7 @@ export default function HomePage() {
     }
 
     setTapping(actionId)
-    const date = getTodayDate()
+    const date = todayStr()
 
     const success = await addRecord({
       personId: person.id,
@@ -160,7 +156,7 @@ export default function HomePage() {
             <Sparkles className="w-5 h-5 text-amber-500" />
             <h2 className="text-base font-bold text-stone-700">本月足跡</h2>
           </div>
-          {monthRecords.length === 0 ? (
+          {monthCount === 0 ? (
             <p className="text-stone-500 text-base leading-relaxed">
               這個月還沒有紀錄，快來記第一筆吧！🌱
             </p>
@@ -169,7 +165,7 @@ export default function HomePage() {
               <div className="flex items-end justify-between">
                 <span className="text-stone-500 text-base">本月互動</span>
                 <span className="text-3xl font-black text-lime-600 tabular-nums">
-                  {monthRecords.length}
+                  {monthCount}
                   <span className="text-base font-bold text-stone-400 ml-1">次</span>
                 </span>
               </div>
@@ -311,8 +307,7 @@ export default function HomePage() {
           <div className="space-y-2">
             {todayRecords.map(r => {
               const meta = ITEM_META[r.itemType]
-              const person = people.find(p => p.id === r.personId)
-              const color = person?.color || '#9CA3AF'
+              const color = resolvePersonColor(r, people)
               return (
                 <div key={r.id} className="glass-card rounded-2xl px-4 py-3 flex items-center gap-3">
                   <div

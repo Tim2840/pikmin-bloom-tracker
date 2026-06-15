@@ -6,17 +6,14 @@ import {
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { ItemType, RecordItem } from '../types'
+import { ItemType, RecordItem, RecordFormValues } from '../types'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
-import RecordForm, { RecordFormValues } from '../components/RecordForm'
+import { formatDate } from '../lib/dateUtils'
+import { resolvePersonName, resolvePersonColor, filterRecords } from '../services/recordService'
+import RecordForm from '../components/RecordForm'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
-
-const formatDate = (dateStr: string) => {
-  const [y, m, d] = dateStr.split('-')
-  return `${y}/${m}/${d}`
-}
 
 export default function RecordsPage() {
   const { records, loading, error, fetchRecords, addRecord, updateRecord, deleteRecord } = useRecordsStore()
@@ -41,29 +38,10 @@ export default function RecordsPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const personName = (r: RecordItem) => {
-    if (r.personId) {
-      const p = people.find(pp => pp.id === r.personId)
-      if (p) return p.name
-    }
-    return r.personNameSnapshot || '已刪除的好友'
-  }
-
-  const personColor = (r: RecordItem) => {
-    if (r.personId) {
-      const p = people.find(pp => pp.id === r.personId)
-      if (p) return p.color || '#6B7280'
-    }
-    return '#9CA3AF'
-  }
-
-  // 無篩選時顯示最近 30 筆；有篩選條件時顯示全部符合結果
-  const filtered = useMemo(() => {
-    const result = records
-      .filter(r => filterPersonId === 'all' || r.personId === filterPersonId)
-      .filter(r => filterItem === 'all' || r.itemType === filterItem)
-    return (filterPersonId === 'all' && filterItem === 'all') ? result.slice(0, 30) : result
-  }, [records, filterPersonId, filterItem])
+  const filtered = useMemo(
+    () => filterRecords(records, { personId: filterPersonId, itemType: filterItem }),
+    [records, filterPersonId, filterItem]
+  )
 
   const handleAdd = async (values: RecordFormValues) => {
     const success = await addRecord(values)
@@ -226,7 +204,7 @@ export default function RecordsPage() {
                 {/* 品項 emoji */}
                 <div
                   className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
-                  style={{ backgroundColor: `${personColor(r)}20` }}
+                  style={{ backgroundColor: `${resolvePersonColor(r, people)}20` }}
                 >
                   {meta.emoji}
                 </div>
@@ -234,7 +212,7 @@ export default function RecordsPage() {
                 {/* 主要資訊 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-black text-base text-stone-800 truncate">{personName(r)}</h3>
+                    <h3 className="font-black text-base text-stone-800 truncate">{resolvePersonName(r, people)}</h3>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ACTION_STYLE[r.actionType]}`}>
                       {actionFullLabel(r.itemType, r.actionType)}
                     </span>
