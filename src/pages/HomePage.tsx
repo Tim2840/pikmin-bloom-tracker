@@ -137,7 +137,7 @@ export default function HomePage() {
       {showBackupReminder && (
         <BackupReminderModal
           onSetupNow={() => { setShowBackupReminder(false); setShowEmailModal(true) }}
-          onLater={() => setShowBackupReminder(false)}
+          onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時設定 Email 備份') }}
         />
       )}
       {showEmailModal && <EmailBackupModal onClose={() => setShowEmailModal(false)} />}
