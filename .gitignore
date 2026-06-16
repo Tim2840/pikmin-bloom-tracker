@@ -36,3 +36,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# UI 自動截圖產物（本地驗證用，不進版控）
+screenshots/
