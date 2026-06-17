@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck, AlertCircle } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck, AlertCircle, LogOut } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { linkGoogle, signInWithGoogle } from '../lib/auth'
+import { linkGoogle, signInWithGoogle, signOut } from '../lib/auth'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
 import EmailBackupModal from '../components/EmailBackupModal'
 
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const { user, isAnonymous } = useAuthStore()
   const [emailModal, setEmailModal] = useState<null | 'backup' | 'restore'>(null)
   const [authError, setAuthError] = useState('')
+  const [confirmLogout, setConfirmLogout] = useState(false)
   const dbEnabled = isSupabaseConfigured()
 
   // 追蹤 PWA 可安裝狀態
@@ -53,6 +54,14 @@ export default function SettingsPage() {
     setAuthError('')
     const { error } = await signInWithGoogle()
     if (error) setAuthError(`Google 登入失敗：${error}`)
+  }
+  // 登出：清掉本機資料 + 結束 session，重新載入後會建立新的匿名帳號、回到備份提示
+  const handleLogout = async () => {
+    await signOut()
+    localStorage.removeItem('piklog_records')
+    localStorage.removeItem('piklog_people')
+    localStorage.removeItem('piklog_quick_actions')
+    window.location.assign(`${import.meta.env.BASE_URL}settings`)
   }
 
   return (
@@ -183,12 +192,42 @@ export default function SettingsPage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-2xl p-4">
-              <CheckCircle2 className="w-6 h-6 text-lime-600 shrink-0" />
-              <div>
-                <p className="font-bold text-lime-800 text-base">雲端備份已啟用</p>
-                <p className="text-lime-700 text-sm">{user.email}</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-2xl p-4">
+                <CheckCircle2 className="w-6 h-6 text-lime-600 shrink-0" />
+                <div>
+                  <p className="font-bold text-lime-800 text-base">雲端備份已啟用</p>
+                  <p className="text-lime-700 text-sm">{user.email}</p>
+                </div>
               </div>
+              {!confirmLogout ? (
+                <button
+                  onClick={() => setConfirmLogout(true)}
+                  className="accessible-target inline-flex items-center gap-1.5 text-base font-bold text-stone-500 hover:text-rose-600 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" /> 登出此帳號
+                </button>
+              ) : (
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
+                  <p className="text-stone-700 text-sm leading-relaxed mb-3">
+                    登出後這台裝置會清空紀錄，需要重新用 Google／Email 登入才會把資料還原回來。確定要登出嗎？
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setConfirmLogout(false)}
+                      className="accessible-target flex-1 h-11 rounded-xl bg-stone-100 text-stone-600 font-bold hover:bg-stone-200 transition-colors"
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="accessible-target flex-1 h-11 rounded-xl bg-rose-600 text-white font-extrabold hover:bg-rose-700 transition-colors"
+                    >
+                      確定登出
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
