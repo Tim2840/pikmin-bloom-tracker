@@ -26,7 +26,10 @@ export default function AuthHashNotice() {
           : '連結驗證沒有成功，請回「設定 → 雲端備份」再試一次。',
       })
       clearHash()
-    } else if (type && /email_change|signup|magiclink|recovery/.test(type)) {
+    } else if (type && /magiclink|recovery/.test(type)) {
+      setNotice({ type: 'ok', text: '登入成功，已把你的資料還原回來了 🎉' })
+      clearHash()
+    } else if (type && /email_change|signup/.test(type)) {
       setNotice({ type: 'ok', text: 'Email 綁定成功！之後換裝置就能用這個 Email 還原資料 🎉' })
       clearHash()
     }
