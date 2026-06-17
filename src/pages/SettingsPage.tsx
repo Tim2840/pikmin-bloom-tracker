@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck, AlertCircle } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
+import { linkGoogle, signInWithGoogle } from '../lib/auth'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
 import EmailBackupModal from '../components/EmailBackupModal'
 
@@ -13,11 +14,23 @@ const PRESETS = [
   { label: '特大', sub: '130%', value: 1.3 },
 ]
 
+function GoogleG({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  )
+}
+
 export default function SettingsPage() {
   const { settings, setFontScale, reset } = useSettingsStore()
   const scale = settings.fontScale
   const { user, isAnonymous } = useAuthStore()
   const [emailModal, setEmailModal] = useState<null | 'backup' | 'restore'>(null)
+  const [authError, setAuthError] = useState('')
   const dbEnabled = isSupabaseConfigured()
 
   // 追蹤 PWA 可安裝狀態
@@ -29,6 +42,17 @@ export default function SettingsPage() {
 
   const handleInstall = async () => {
     await promptInstall()
+  }
+
+  const handleGoogleBackup = async () => {
+    setAuthError('')
+    const { error } = await linkGoogle()
+    if (error) setAuthError(`Google 備份失敗：${error}`)
+  }
+  const handleGoogleRestore = async () => {
+    setAuthError('')
+    const { error } = await signInWithGoogle()
+    if (error) setAuthError(`Google 登入失敗：${error}`)
   }
 
   return (
@@ -112,29 +136,57 @@ export default function SettingsPage() {
           {isAnonymous || !user ? (
             <>
               <p className="text-stone-500 text-base mb-4 leading-relaxed">
-                設定 Email 後，換手機或清除瀏覽器時可透過 Email 連結還原所有紀錄。
+                備份後，換手機或清除瀏覽器時就能登回同一個帳號、把紀錄全部還原。
               </p>
               <p className="text-amber-700 text-sm font-medium bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
-                ⚠️ 目前為「本機帳號」模式。清除瀏覽器資料或換裝置前，請先設定 Email 備份。
+                ⚠️ 目前為「本機帳號」模式。清除瀏覽器資料或換裝置前，請先備份。
               </p>
+
+              {authError && (
+                <div className="flex items-start gap-2 text-rose-700 bg-rose-50 border border-rose-200 rounded-2xl px-4 py-3 mb-4">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <p className="text-sm font-medium">{authError}</p>
+                </div>
+              )}
+
+              {/* Google：主要方式 */}
               <button
-                onClick={() => setEmailModal('backup')}
-                className="accessible-target inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-base shadow-md transition-all active:scale-95"
+                onClick={handleGoogleBackup}
+                className="accessible-target w-full sm:w-auto inline-flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-white border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-extrabold text-base shadow-sm transition-all active:scale-95"
               >
-                <Mail className="w-5 h-5" /> 設定 Email 備份
+                <GoogleG className="w-5 h-5" /> 用 Google 帳號備份
               </button>
               <button
-                onClick={() => setEmailModal('restore')}
+                onClick={handleGoogleRestore}
                 className="accessible-target block mt-3 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
               >
-                已經有帳號？用 Email 登入還原
+                已經有帳號？用 Google 登入還原
               </button>
+
+              {/* Email：備援方式 */}
+              <div className="mt-5 pt-4 border-t border-stone-100">
+                <p className="text-stone-400 text-sm mb-2">沒有 Google 帳號？也可以用 Email：</p>
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  <button
+                    onClick={() => setEmailModal('backup')}
+                    className="accessible-target inline-flex items-center gap-1.5 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
+                  >
+                    <Mail className="w-4 h-4" /> 用 Email 備份
+                  </button>
+                  <button
+                    onClick={() => setEmailModal('restore')}
+                    className="accessible-target text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
+                  >
+                    用 Email 登入還原
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
             <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-2xl p-4">
               <CheckCircle2 className="w-6 h-6 text-lime-600 shrink-0" />
               <div>
-                <p className="font-bold text-lime-800 text-base">已設定 Email 備份</p>
+                <p className="font-bold text-lime-800 text-base">雲端備份已啟用</p>
                 <p className="text-lime-700 text-sm">{user.email}</p>
               </div>
             </div>

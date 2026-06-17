@@ -40,6 +40,30 @@ export async function signInWithEmail(email: string): Promise<{ error: string | 
   return { error: null }
 }
 
+const appUrl = (): string => `${window.location.origin}${import.meta.env.BASE_URL}`
+
+// 匿名帳號「綁定」Google（保留現有資料）。導向 Google 後再回到線上 App。
+export async function linkGoogle(): Promise<{ error: string | null }> {
+  if (!isSupabaseConfigured()) return { error: '尚未設定雲端同步' }
+  const { error } = await supabase.auth.linkIdentity({
+    provider: 'google',
+    options: { redirectTo: appUrl() },
+  })
+  if (error) return { error: error.message }
+  return { error: null }
+}
+
+// 換裝置：用 Google 登入（以該 Google 帳號身份登入並還原其資料）。
+export async function signInWithGoogle(): Promise<{ error: string | null }> {
+  if (!isSupabaseConfigured()) return { error: '尚未設定雲端同步' }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: appUrl() },
+  })
+  if (error) return { error: error.message }
+  return { error: null }
+}
+
 export async function signOut(): Promise<void> {
   if (!isSupabaseConfigured()) return
   await supabase.auth.signOut()

@@ -8,14 +8,14 @@ export default function AuthHashNotice() {
   const [notice, setNotice] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
   useEffect(() => {
-    const raw = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
-    if (!raw) return
-    const params = new URLSearchParams(raw)
-    const errorCode = params.get('error_code') || params.get('error')
-    const type = params.get('type')
+    // Email 流程結果在 hash；OAuth（Google）錯誤在 query。成功的 ?code= 留給 supabase-js 處理。
+    const hp = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const sp = new URLSearchParams(window.location.search.replace(/^\?/, ''))
+    const errorCode = hp.get('error_code') || hp.get('error') || sp.get('error_code') || sp.get('error')
+    const type = hp.get('type')
+    if (!errorCode && !type) return
 
-    const clearHash = () =>
-      history.replaceState(null, '', window.location.pathname + window.location.search)
+    const clearHash = () => history.replaceState(null, '', window.location.pathname)
 
     if (errorCode) {
       const expired = /expired|otp/i.test(errorCode)
