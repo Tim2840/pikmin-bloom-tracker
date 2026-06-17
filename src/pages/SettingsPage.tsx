@@ -48,7 +48,7 @@ export default function SettingsPage() {
   const handleGoogleBackup = async () => {
     setAuthError('')
     const { error } = await linkGoogle()
-    if (error) setAuthError(`Google 備份失敗：${error}`)
+    if (error) setAuthError(`Google 登入失敗：${error}`)
   }
   const handleGoogleRestore = async () => {
     setAuthError('')
@@ -136,19 +136,19 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* 雲端備份 */}
+      {/* 帳號與同步 */}
       {dbEnabled && (
         <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">
           <h2 className="text-lg font-extrabold text-stone-800 mb-1 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-lime-600" /> 雲端備份與同步
+            <ShieldCheck className="w-5 h-5 text-lime-600" /> 帳號與同步
           </h2>
           {isAnonymous || !user ? (
             <>
               <p className="text-stone-500 text-base mb-4 leading-relaxed">
-                備份後，換手機或清除瀏覽器時就能登回同一個帳號、把紀錄全部還原。
+                登入後，紀錄會存到你的帳號；換手機或清除瀏覽器都能登回來，資料不會不見。
               </p>
               <p className="text-amber-700 text-sm font-medium bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
-                ⚠️ 目前為「本機帳號」模式。清除瀏覽器資料或換裝置前，請先備份。
+                ⚠️ 目前是「訪客模式」，資料只存在這台裝置。建議登入保存。
               </p>
 
               {authError && (
@@ -163,30 +163,30 @@ export default function SettingsPage() {
                 onClick={handleGoogleBackup}
                 className="accessible-target w-full sm:w-auto inline-flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-white border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-extrabold text-base shadow-sm transition-all active:scale-95"
               >
-                <GoogleG className="w-5 h-5" /> 用 Google 帳號備份
+                <GoogleG className="w-5 h-5" /> 用 Google 登入
               </button>
               <button
                 onClick={handleGoogleRestore}
                 className="accessible-target block mt-3 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
               >
-                已經有帳號？用 Google 登入還原
+                換了裝置？用 Google 登入帶回資料
               </button>
 
               {/* Email：備援方式 */}
               <div className="mt-5 pt-4 border-t border-stone-100">
-                <p className="text-stone-400 text-sm mb-2">沒有 Google 帳號？也可以用 Email：</p>
+                <p className="text-stone-400 text-sm mb-2">沒有 Google？也可以用 Email 登入：</p>
                 <div className="flex flex-wrap gap-x-5 gap-y-2">
                   <button
                     onClick={() => setEmailModal('backup')}
                     className="accessible-target inline-flex items-center gap-1.5 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
                   >
-                    <Mail className="w-4 h-4" /> 用 Email 備份
+                    <Mail className="w-4 h-4" /> 用 Email 登入
                   </button>
                   <button
                     onClick={() => setEmailModal('restore')}
                     className="accessible-target text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
                   >
-                    用 Email 登入還原
+                    換了裝置？用 Email 登入
                   </button>
                 </div>
               </div>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3 bg-lime-50 border border-lime-200 rounded-2xl p-4">
                 <CheckCircle2 className="w-6 h-6 text-lime-600 shrink-0" />
                 <div>
-                  <p className="font-bold text-lime-800 text-base">雲端備份已啟用</p>
+                  <p className="font-bold text-lime-800 text-base">已登入並同步</p>
                   <p className="text-lime-700 text-sm">{user.email}</p>
                 </div>
               </div>

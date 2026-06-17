@@ -22,15 +22,15 @@ export default function AuthHashNotice() {
       setNotice({
         type: 'err',
         text: expired
-          ? '這個確認連結已過期或用過了，請回「設定 → 雲端備份」重新寄一次確認信。'
-          : '連結驗證沒有成功，請回「設定 → 雲端備份」再試一次。',
+          ? '這個登入連結已過期或用過了，請回「設定 → 帳號與同步」重新寄一次。'
+          : '登入沒有成功，請回「設定 → 帳號與同步」再試一次。',
       })
       clearHash()
     } else if (type && /magiclink|recovery/.test(type)) {
       setNotice({ type: 'ok', text: '登入成功，已把你的資料還原回來了 🎉' })
       clearHash()
     } else if (type && /email_change|signup/.test(type)) {
-      setNotice({ type: 'ok', text: 'Email 綁定成功！之後換裝置就能用這個 Email 還原資料 🎉' })
+      setNotice({ type: 'ok', text: '已用 Email 登入！之後換裝置就能用這個 Email 登回來 🎉' })
       clearHash()
     }
   }, [])

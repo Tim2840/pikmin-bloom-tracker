@@ -4,27 +4,27 @@ import { linkEmail, signInWithEmail } from '../lib/auth'
 
 interface Props {
   onClose: () => void
-  /** backup＝綁定 Email 備份（預設）；restore＝用 Email 登入還原 */
+  /** backup＝用 Email 登入並保存（預設）；restore＝換裝置用 Email 登入帶回資料 */
   mode?: 'backup' | 'restore'
 }
 
 const COPY = {
   backup: {
-    title: '設定 Email 備份',
-    intro: '設定 Email 後，換裝置或清除瀏覽器時可以透過 Email 連結還原所有資料。',
-    warn: '⚠️ 設定前請先確認你能收到這個 Email，設定後需要點信中的確認連結才會生效。',
-    submit: '傳送確認信',
-    sentTitle: '確認信已寄出！',
-    sentBody: '點信中的連結後，這台裝置的資料就會與你的 Email 綁定，之後換裝置登入就能還原所有紀錄。',
+    title: '用 Email 登入',
+    intro: '輸入 Email，我們會寄一條登入連結給你；之後換裝置或清除瀏覽器都能登回來，資料不會不見。',
+    warn: '⚠️ 請先確認你能收到這個 Email，需要點信中的連結才會生效。',
+    submit: '傳送登入連結',
+    sentTitle: '登入連結已寄出！',
+    sentBody: '點信中的連結後，就會用這個 Email 登入並把資料存到你的帳號，之後換裝置也能登回來。',
     action: linkEmail,
   },
   restore: {
-    title: '用 Email 登入還原',
-    intro: '輸入你之前綁定備份的 Email，我們會寄一條登入連結給你。',
-    warn: '⚠️ 點信中的連結後，會以這個 Email 的帳號登入，並把該帳號的資料還原回來。',
+    title: '用 Email 登入帶回資料',
+    intro: '輸入你之前登入用的 Email，我們會寄一條登入連結給你。',
+    warn: '⚠️ 點信中的連結後，會以這個 Email 的帳號登入，並把該帳號的資料帶回來。',
     submit: '傳送登入連結',
     sentTitle: '登入連結已寄出！',
-    sentBody: '點信中的連結後，就會登入你的帳號並把資料還原回來。',
+    sentBody: '點信中的連結後，就會登入你的帳號並把資料帶回來。',
     action: signInWithEmail,
   },
 } as const

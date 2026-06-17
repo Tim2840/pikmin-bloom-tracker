@@ -12,7 +12,6 @@ import { getHomeStats, resolvePersonColor } from '../services/recordService'
 import { RecordFormValues } from '../types'
 import RecordForm from '../components/RecordForm'
 import BackupReminderModal, { hasSeenBackupReminder } from '../components/BackupReminderModal'
-import EmailBackupModal from '../components/EmailBackupModal'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
@@ -62,7 +61,6 @@ export default function HomePage() {
   const [tapping, setTapping] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showBackupReminder, setShowBackupReminder] = useState(false)
-  const [showEmailModal, setShowEmailModal] = useState(false)
 
   const tutSteps = TUTORIAL_STEPS.home
   const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('home', tutSteps.length)
@@ -73,7 +71,7 @@ export default function HomePage() {
     fetchRecords()
   }, [fetchQuickActions, fetchPeople, fetchRecords])
 
-  // 首次啟動且為匿名帳號時顯示備份提醒
+  // 首次啟動且為匿名帳號時顯示登入提醒
   useEffect(() => {
     if (!authLoading && isAnonymous && isSupabaseConfigured() && !hasSeenBackupReminder()) {
       setShowBackupReminder(true)
@@ -133,14 +131,13 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
-      {/* 首次備份提醒 Modal */}
+      {/* 首次登入提醒 Modal */}
       {showBackupReminder && (
         <BackupReminderModal
-          onSetupNow={() => { setShowBackupReminder(false); setShowEmailModal(true) }}
-          onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時設定 Email 備份') }}
+          onSetupNow={() => { setShowBackupReminder(false); navigate('/settings') }}
+          onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時登入保存') }}
         />
       )}
-      {showEmailModal && <EmailBackupModal onClose={() => setShowEmailModal(false)} />}
 
       {/* Toast */}
       {toast && (

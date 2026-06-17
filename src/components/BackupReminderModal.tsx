@@ -1,4 +1,4 @@
-import { ShieldAlert, Mail, Clock } from 'lucide-react'
+import { ShieldAlert, LogIn, Clock } from 'lucide-react'
 
 const FLAG = 'piklog_backup_reminded'
 
@@ -36,7 +36,7 @@ export default function BackupReminderModal({ onSetupNow, onLater }: Props) {
           </div>
 
           <h2 className="text-2xl font-black text-stone-800 mb-3">
-            資料備份提醒
+            保存你的紀錄
           </h2>
 
           <p className="text-stone-600 text-base leading-relaxed mb-2">
@@ -49,10 +49,10 @@ export default function BackupReminderModal({ onSetupNow, onLater }: Props) {
 
           <div className="bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-left">
             <p className="text-sky-800 text-base font-bold mb-1 flex items-center gap-2">
-              <Mail className="w-4 h-4 shrink-0" /> 設定 Email 備份
+              <LogIn className="w-4 h-4 shrink-0" /> 登入就能保存
             </p>
             <p className="text-sky-700 text-sm leading-relaxed">
-              輸入你的 Email，之後換裝置只要收一封信就能還原全部資料，非常簡單。
+              登入（Google 或 Email）後，換手機或清除瀏覽器都能登回來，資料不會不見。
             </p>
           </div>
 
@@ -61,8 +61,8 @@ export default function BackupReminderModal({ onSetupNow, onLater }: Props) {
             onClick={handleSetupNow}
             className="accessible-target w-full h-14 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-lg shadow-md transition-all active:scale-95 mb-3 flex items-center justify-center gap-2"
           >
-            <Mail className="w-5 h-5" />
-            現在設定 Email 備份
+            <LogIn className="w-5 h-5" />
+            現在去登入保存
           </button>
 
           {/* 次要按鈕 */}
