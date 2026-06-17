@@ -8,12 +8,13 @@ import { useAuthStore } from '../stores/useAuthStore'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import { todayStr } from '../lib/dateUtils'
 import { isSupabaseConfigured } from '../lib/supabase'
+import { linkGoogle } from '../lib/auth'
 import { getHomeStats, resolvePersonColor } from '../services/recordService'
 import { RecordFormValues } from '../types'
 import RecordForm from '../components/RecordForm'
 import BackupReminderModal, { hasSeenBackupReminder } from '../components/BackupReminderModal'
 import TutorialOverlay from '../components/TutorialOverlay'
-import { useTutorial } from '../hooks/useTutorial'
+import { useTutorial, hasSeenTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 
@@ -71,12 +72,13 @@ export default function HomePage() {
     fetchRecords()
   }, [fetchQuickActions, fetchPeople, fetchRecords])
 
-  // 首次啟動且為匿名帳號時顯示登入提醒
+  // 首次啟動且為匿名帳號時顯示登入提醒；等首頁教學看完才提示，避免與教學同時出現
   useEffect(() => {
-    if (!authLoading && isAnonymous && isSupabaseConfigured() && !hasSeenBackupReminder()) {
+    if (!authLoading && isAnonymous && isSupabaseConfigured()
+      && !hasSeenBackupReminder() && !tutOpen && hasSeenTutorial('home')) {
       setShowBackupReminder(true)
     }
-  }, [authLoading, isAnonymous])
+  }, [authLoading, isAnonymous, tutOpen])
 
   const today = todayStr()
   const todayRecords = records.filter(r => r.date === today)
@@ -134,7 +136,8 @@ export default function HomePage() {
       {/* 首次登入提醒 Modal */}
       {showBackupReminder && (
         <BackupReminderModal
-          onSetupNow={() => { setShowBackupReminder(false); navigate('/settings') }}
+          onGoogle={async () => { setShowBackupReminder(false); const { error } = await linkGoogle(); if (error) navigate('/settings') }}
+          onEmail={() => { setShowBackupReminder(false); navigate('/settings') }}
           onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時登入保存') }}
         />
       )}

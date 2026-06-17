@@ -16,6 +16,11 @@ function markSeen(pageKey: string) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seen))
 }
 
+/** 是否已看過某頁教學（供其他流程判斷時機，例如登入提醒避開教學） */
+export function hasSeenTutorial(pageKey: string): boolean {
+  return !!getSeen()[pageKey]
+}
+
 export function useTutorial(pageKey: string, totalSteps: number) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
