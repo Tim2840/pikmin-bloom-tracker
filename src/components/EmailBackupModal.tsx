@@ -1,12 +1,36 @@
 import { useState } from 'react'
 import { Mail, X, Check, AlertCircle, Loader2 } from 'lucide-react'
-import { linkEmail } from '../lib/auth'
+import { linkEmail, signInWithEmail } from '../lib/auth'
 
 interface Props {
   onClose: () => void
+  /** backup＝綁定 Email 備份（預設）；restore＝用 Email 登入還原 */
+  mode?: 'backup' | 'restore'
 }
 
-export default function EmailBackupModal({ onClose }: Props) {
+const COPY = {
+  backup: {
+    title: '設定 Email 備份',
+    intro: '設定 Email 後，換裝置或清除瀏覽器時可以透過 Email 連結還原所有資料。',
+    warn: '⚠️ 設定前請先確認你能收到這個 Email，設定後需要點信中的確認連結才會生效。',
+    submit: '傳送確認信',
+    sentTitle: '確認信已寄出！',
+    sentBody: '點信中的連結後，這台裝置的資料就會與你的 Email 綁定，之後換裝置登入就能還原所有紀錄。',
+    action: linkEmail,
+  },
+  restore: {
+    title: '用 Email 登入還原',
+    intro: '輸入你之前綁定備份的 Email，我們會寄一條登入連結給你。',
+    warn: '⚠️ 點信中的連結後，會以這個 Email 的帳號登入，並把該帳號的資料還原回來。',
+    submit: '傳送登入連結',
+    sentTitle: '登入連結已寄出！',
+    sentBody: '點信中的連結後，就會登入你的帳號並把資料還原回來。',
+    action: signInWithEmail,
+  },
+} as const
+
+export default function EmailBackupModal({ onClose, mode = 'backup' }: Props) {
+  const c = COPY[mode]
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -15,7 +39,7 @@ export default function EmailBackupModal({ onClose }: Props) {
     e.preventDefault()
     if (!email.trim()) return
     setStatus('loading')
-    const { error } = await linkEmail(email.trim())
+    const { error } = await c.action(email.trim())
     if (error) {
       setErrorMsg(error)
       setStatus('error')
@@ -33,7 +57,7 @@ export default function EmailBackupModal({ onClose }: Props) {
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-stone-100">
           <h2 className="text-lg font-black text-stone-800 flex items-center gap-2">
             <Mail className="w-5 h-5 text-sky-500" />
-            設定 Email 備份
+            {c.title}
           </h2>
           <button
             onClick={onClose}
@@ -49,14 +73,11 @@ export default function EmailBackupModal({ onClose }: Props) {
               <div className="w-16 h-16 bg-lime-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-8 h-8 text-lime-600" />
               </div>
-              <h3 className="text-xl font-black text-stone-800 mb-2">確認信已寄出！</h3>
+              <h3 className="text-xl font-black text-stone-800 mb-2">{c.sentTitle}</h3>
               <p className="text-stone-600 text-base leading-relaxed mb-1">
                 請到 <span className="font-bold text-sky-700">{email}</span> 收信。
               </p>
-              <p className="text-stone-500 text-sm leading-relaxed mb-6">
-                點信中的連結後，這台裝置的資料就會與你的 Email 綁定，
-                之後換裝置登入就能還原所有紀錄。
-              </p>
+              <p className="text-stone-500 text-sm leading-relaxed mb-6">{c.sentBody}</p>
               <button
                 onClick={onClose}
                 className="accessible-target w-full h-12 rounded-2xl bg-lime-600 text-white font-extrabold text-lg hover:bg-lime-700 transition-colors"
@@ -66,11 +87,9 @@ export default function EmailBackupModal({ onClose }: Props) {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-stone-600 text-base leading-relaxed">
-                設定 Email 後，換裝置或清除瀏覽器時可以透過 Email 連結還原所有資料。
-              </p>
+              <p className="text-stone-600 text-base leading-relaxed">{c.intro}</p>
               <p className="text-stone-500 text-sm leading-relaxed bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
-                ⚠️ 設定前請先確認你能收到這個 Email，設定後需要點信中的確認連結才會生效。
+                {c.warn}
               </p>
 
               {status === 'error' && (
@@ -111,7 +130,7 @@ export default function EmailBackupModal({ onClose }: Props) {
                     ? <Loader2 className="w-5 h-5 animate-spin" />
                     : <Mail className="w-5 h-5" />
                   }
-                  {status === 'loading' ? '傳送中…' : '傳送確認信'}
+                  {status === 'loading' ? '傳送中…' : c.submit}
                 </button>
               </div>
             </form>

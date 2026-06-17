@@ -17,7 +17,7 @@ export default function SettingsPage() {
   const { settings, setFontScale, reset } = useSettingsStore()
   const scale = settings.fontScale
   const { user, isAnonymous } = useAuthStore()
-  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [emailModal, setEmailModal] = useState<null | 'backup' | 'restore'>(null)
   const dbEnabled = isSupabaseConfigured()
 
   // 追蹤 PWA 可安裝狀態
@@ -33,7 +33,7 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full pb-4">
-      {showEmailModal && <EmailBackupModal onClose={() => setShowEmailModal(false)} />}
+      {emailModal && <EmailBackupModal mode={emailModal} onClose={() => setEmailModal(null)} />}
       {/* 標題 */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-black text-stone-800 tracking-tight flex items-center gap-2">
@@ -118,10 +118,16 @@ export default function SettingsPage() {
                 ⚠️ 目前為「本機帳號」模式。清除瀏覽器資料或換裝置前，請先設定 Email 備份。
               </p>
               <button
-                onClick={() => setShowEmailModal(true)}
+                onClick={() => setEmailModal('backup')}
                 className="accessible-target inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-base shadow-md transition-all active:scale-95"
               >
                 <Mail className="w-5 h-5" /> 設定 Email 備份
+              </button>
+              <button
+                onClick={() => setEmailModal('restore')}
+                className="accessible-target block mt-3 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
+              >
+                已經有帳號？用 Email 登入還原
               </button>
             </>
           ) : (

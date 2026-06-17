@@ -27,6 +27,19 @@ export async function linkEmail(email: string): Promise<{ error: string | null }
   return { error: null }
 }
 
+// 已有帳號者（換裝置/清快取後）：寄登入連結，點了就以該 Email 的帳號登入並還原資料。
+// shouldCreateUser: false → 若查無此 Email 帳號會回錯誤，不會誤建新帳號。
+export async function signInWithEmail(email: string): Promise<{ error: string | null }> {
+  if (!isSupabaseConfigured()) return { error: '尚未設定雲端同步' }
+  const emailRedirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo, shouldCreateUser: false },
+  })
+  if (error) return { error: error.message }
+  return { error: null }
+}
+
 export async function signOut(): Promise<void> {
   if (!isSupabaseConfigured()) return
   await supabase.auth.signOut()
