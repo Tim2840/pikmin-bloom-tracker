@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, AlertCircle, X } from 'lucide-react'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
-// Email 確認連結導回 App 時，網址 hash 會帶結果（成功或失敗）。
+// Email/Google 連結導回 App 時，網址會帶結果（成功或失敗）。
 // 這個元件把它解析成友善提示，避免使用者看到空白頁或 localhost 錯誤。
-// 成功的 token hash 由 supabase-js 自動處理並清掉；失效/拒絕的 error hash 由這裡接手。
+// 成功的 token 由 supabase-js 自動處理並清掉；失效/拒絕的 error 由這裡接手。
 export default function AuthHashNotice() {
   const [notice, setNotice] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
@@ -18,19 +19,34 @@ export default function AuthHashNotice() {
     const clearHash = () => history.replaceState(null, '', window.location.pathname)
 
     if (errorCode) {
-      const expired = /expired|otp/i.test(errorCode)
-      setNotice({
-        type: 'err',
-        text: expired
-          ? '這個登入連結已過期或用過了，請回「設定 → 帳號與同步」重新寄一次。'
-          : '登入沒有成功，請回「設定 → 帳號與同步」再試一次。',
-      })
       clearHash()
-    } else if (type && /magiclink|recovery/.test(type)) {
-      setNotice({ type: 'ok', text: '登入成功，已把你的資料還原回來了 🎉' })
+      const expired = /expired|otp/i.test(errorCode)
+      // 失敗時先查目前帳號是否其實已綁定 Google：已綁定就給正向提示，否則才提示失敗。
+      ;(async () => {
+        let alreadyGoogle = false
+        try {
+          if (isSupabaseConfigured()) {
+            const { data } = await supabase.auth.getUser()
+            alreadyGoogle = (data.user?.identities ?? []).some((i) => i.provider === 'google')
+          }
+        } catch { /* 查不到就當作未綁定 */ }
+
+        if (alreadyGoogle) {
+          setNotice({ type: 'ok', text: '你已經綁定 Google 帳號了，資料會自動同步 🎉' })
+        } else if (expired) {
+          setNotice({ type: 'err', text: '這個連結已過期或用過了，請回「設定 → 帳號與同步」重新試一次。' })
+        } else {
+          setNotice({ type: 'err', text: '綁定沒有成功，請回「設定 → 帳號與同步」再試一次。' })
+        }
+      })()
+      return
+    }
+
+    if (type && /magiclink|recovery/.test(type)) {
+      setNotice({ type: 'ok', text: '已切換到你的帳號，資料已取回 🎉' })
       clearHash()
     } else if (type && /email_change|signup/.test(type)) {
-      setNotice({ type: 'ok', text: '已用 Email 登入！之後換裝置就能用這個 Email 登回來 🎉' })
+      setNotice({ type: 'ok', text: '已綁定 Email！之後換裝置就能用這個 Email 取回資料 🎉' })
       clearHash()
     }
   }, [])

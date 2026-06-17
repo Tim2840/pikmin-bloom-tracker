@@ -10,21 +10,21 @@ interface Props {
 
 const COPY = {
   backup: {
-    title: '用 Email 登入',
-    intro: '輸入 Email，我們會寄一條登入連結給你；之後換裝置或清除瀏覽器都能登回來，資料不會不見。',
+    title: '綁定 Email',
+    intro: '輸入 Email，我們會寄一條確認連結給你；綁定後，換裝置或清除瀏覽器都能取回資料、不會不見。',
     warn: '⚠️ 請先確認你能收到這個 Email，需要點信中的連結才會生效。',
-    submit: '傳送登入連結',
-    sentTitle: '登入連結已寄出！',
-    sentBody: '點信中的連結後，就會用這個 Email 登入並把資料存到你的帳號，之後換裝置也能登回來。',
+    submit: '傳送確認連結',
+    sentTitle: '確認連結已寄出！',
+    sentBody: '點信中的連結後，就會把這個 Email 綁定到你的帳號，之後換裝置也能取回資料。',
     action: linkEmail,
   },
   restore: {
-    title: '用 Email 登入帶回資料',
-    intro: '輸入你之前登入用的 Email，我們會寄一條登入連結給你。',
-    warn: '⚠️ 點信中的連結後，會以這個 Email 的帳號登入，並把該帳號的資料帶回來。',
-    submit: '傳送登入連結',
-    sentTitle: '登入連結已寄出！',
-    sentBody: '點信中的連結後，就會登入你的帳號並把資料帶回來。',
+    title: '用 Email 取回資料',
+    intro: '輸入你之前綁定的 Email，我們會寄一條連結給你。',
+    warn: '⚠️ 點信中的連結後，會切換到這個 Email 的帳號，並把資料取回來。',
+    submit: '傳送連結',
+    sentTitle: '連結已寄出！',
+    sentBody: '點信中的連結後，就會切換到你的帳號並把資料取回來。',
     action: signInWithEmail,
   },
 } as const

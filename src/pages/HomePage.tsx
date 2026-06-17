@@ -138,7 +138,7 @@ export default function HomePage() {
         <BackupReminderModal
           onGoogle={async () => { setShowBackupReminder(false); const { error } = await linkGoogle(); if (error) navigate('/settings') }}
           onEmail={() => { setShowBackupReminder(false); navigate('/settings') }}
-          onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時登入保存') }}
+          onLater={() => { setShowBackupReminder(false); showToast('可到「⚙️ 設定」頁隨時綁定帳號保存') }}
         />
       )}
 

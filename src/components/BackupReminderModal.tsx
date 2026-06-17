@@ -40,10 +40,10 @@ export default function BackupReminderModal({ onGoogle, onEmail, onLater }: Prop
 
           <div className="bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-left">
             <p className="text-sky-800 text-base font-bold mb-1 flex items-center gap-2">
-              <LogIn className="w-4 h-4 shrink-0" /> 登入就能保存
+              <LogIn className="w-4 h-4 shrink-0" /> 綁定帳號就能保存
             </p>
             <p className="text-sky-700 text-sm leading-relaxed">
-              登入後，換手機或清除瀏覽器都能登回來，資料不會不見。
+              綁定後，換手機或清除瀏覽器都能取回，資料不會不見。
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export default function BackupReminderModal({ onGoogle, onEmail, onLater }: Prop
             onClick={wrap(onGoogle)}
             className="accessible-target w-full h-14 rounded-2xl bg-white border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-extrabold text-lg shadow-sm transition-all active:scale-95 mb-3 flex items-center justify-center gap-3"
           >
-            <GoogleG className="w-6 h-6" /> 用 Google 登入
+            <GoogleG className="w-6 h-6" /> 綁定 Google 帳號
           </button>
 
           {/* 次要：Email 登入 */}
@@ -60,7 +60,7 @@ export default function BackupReminderModal({ onGoogle, onEmail, onLater }: Prop
             onClick={wrap(onEmail)}
             className="accessible-target w-full h-12 rounded-2xl text-sky-700 hover:text-sky-800 font-bold text-base underline underline-offset-2 mb-3"
           >
-            也可以用 Email 登入
+            也可以綁定 Email
           </button>
 
           {/* 之後再說 */}
