@@ -57,7 +57,13 @@ export default function AuthHashNotice() {
         } else if (expired) {
           setNotice({ type: 'err', text: '這個連結已過期或用過了，請回「設定 → 帳號與同步」重新試一次。' })
         } else {
-          setNotice({ type: 'err', text: '綁定沒有成功，請回「設定 → 帳號與同步」再試一次。' })
+          // 綁定失敗：最可能是這個 Google 之前已綁過，提供「取回資料」當下一步
+          setNotice({
+            type: 'err',
+            text: '綁定沒有成功。如果這個 Google 之前綁定過，請改用「取回資料」。',
+            actionLabel: '取回資料',
+            onAction: () => { signInWithGoogle() },
+          })
         }
       })()
       return
