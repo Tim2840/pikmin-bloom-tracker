@@ -3,7 +3,7 @@ import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { linkGoogle, signInWithGoogle, signOut } from '../lib/auth'
+import { linkGoogle, signOut } from '../lib/auth'
 import GoogleG from '../components/GoogleG'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
 import EmailBackupModal from '../components/EmailBackupModal'
@@ -35,15 +35,11 @@ export default function SettingsPage() {
     await promptInstall()
   }
 
-  const handleGoogleBackup = async () => {
+  // 用 Google 繼續：linkIdentity 綁定為主；若該 Google 已綁過，導回後 AuthHashNotice 會自動帶去取回
+  const handleGoogle = async () => {
     setAuthError('')
     const { error } = await linkGoogle()
-    if (error) setAuthError(`Google 綁定失敗：${error}`)
-  }
-  const handleGoogleRestore = async () => {
-    setAuthError('')
-    const { error } = await signInWithGoogle()
-    if (error) setAuthError(`Google 取回資料失敗：${error}`)
+    if (error) setAuthError(`Google 連線失敗：${error}`)
   }
   // 登出：清掉本機資料 + 結束 session，重新載入後會建立新的匿名帳號、回到綁定提示
   const handleLogout = async () => {
@@ -148,19 +144,16 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Google：主要方式 */}
+              {/* Google：一鍵繼續（自動判斷綁定或取回） */}
               <button
-                onClick={handleGoogleBackup}
+                onClick={handleGoogle}
                 className="accessible-target w-full sm:w-auto inline-flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-white border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-extrabold text-base shadow-sm transition-all active:scale-95"
               >
-                <GoogleG className="w-5 h-5" /> 綁定 Google 帳號
+                <GoogleG className="w-5 h-5" /> 用 Google 繼續
               </button>
-              <button
-                onClick={handleGoogleRestore}
-                className="accessible-target block mt-3 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
-              >
-                換了裝置？用 Google 取回資料
-              </button>
+              <p className="text-stone-400 text-sm mt-2">
+                第一次會建立帳號並保存資料；用過的 Google 會自動帶你取回原本的資料。
+              </p>
 
               {/* Email：備援方式 */}
               <div className="mt-5 pt-4 border-t border-stone-100">

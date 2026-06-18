@@ -52,7 +52,7 @@ export default function BackupReminderModal({ onGoogle, onEmail, onLater }: Prop
             onClick={wrap(onGoogle)}
             className="accessible-target w-full h-14 rounded-2xl bg-white border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-extrabold text-lg shadow-sm transition-all active:scale-95 mb-3 flex items-center justify-center gap-3"
           >
-            <GoogleG className="w-6 h-6" /> 綁定 Google 帳號
+            <GoogleG className="w-6 h-6" /> 用 Google 繼續
           </button>
 
           {/* 次要：Email 登入 */}

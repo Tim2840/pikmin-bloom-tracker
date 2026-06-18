@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, AlertCircle, X } from 'lucide-react'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { signInWithGoogle } from '../lib/auth'
 
 interface Notice {
@@ -10,69 +9,70 @@ interface Notice {
   onAction?: () => void
 }
 
+// 只自動嘗試「取回」一次，避免綁定/取回都失敗時無限跳轉
+const RETRY_FLAG = 'piklog_auth_auto_restore'
+
 // Email/Google 連結導回 App 時，網址會帶結果（成功或失敗）。
-// 把它解析成友善提示；成功的 token 由 supabase-js 自動處理，失效/拒絕的 error 由這裡接手。
+// Google OAuth 錯誤在 query；Email 連結結果在 hash。成功的 ?code= 由 supabase-js 自行處理。
 export default function AuthHashNotice() {
   const [notice, setNotice] = useState<Notice | null>(null)
 
   useEffect(() => {
     const hp = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     const sp = new URLSearchParams(window.location.search.replace(/^\?/, ''))
-    const errorCode = hp.get('error_code') || hp.get('error') || sp.get('error_code') || sp.get('error')
-    const errorDesc = hp.get('error_description') || sp.get('error_description') || ''
+    const hashErr = hp.get('error_code') || hp.get('error')
+    const queryErr = sp.get('error_code') || sp.get('error')
     const type = hp.get('type')
-    if (!errorCode && !type) return
 
-    const clearHash = () => history.replaceState(null, '', window.location.pathname)
-
-    if (errorCode) {
-      clearHash()
-      const blob = `${errorCode} ${errorDesc}`.toLowerCase()
-      // 綁定失敗最常見原因：這個 Google 已綁定到某個帳號 → 應改用「取回資料」(登入該帳號)
-      const alreadyLinked = /already.*(linked|exist|regist)|identity.*already|email.*exist/.test(blob)
-      const expired = /expired|otp/.test(blob)
-
-      if (alreadyLinked) {
-        setNotice({
-          type: 'ok',
-          text: '這個 Google 帳號已經綁定過了 🎉 要把它的資料取回到這台裝置嗎？',
-          actionLabel: '取回資料',
-          onAction: () => { signInWithGoogle() },
-        })
-        return
-      }
-
-      // 其次：目前帳號其實已經綁了 Google？（已是綁定狀態仍重複觸發）
-      ;(async () => {
-        let alreadyGoogle = false
-        try {
-          if (isSupabaseConfigured()) {
-            const { data } = await supabase.auth.getUser()
-            alreadyGoogle = (data.user?.identities ?? []).some((i) => i.provider === 'google')
-          }
-        } catch { /* 查不到就當作未綁定 */ }
-
-        if (alreadyGoogle) {
-          setNotice({ type: 'ok', text: '你已經綁定 Google 帳號了，資料會自動同步 🎉' })
-        } else if (expired) {
-          setNotice({ type: 'err', text: '這個連結已過期或用過了，請回「設定 → 帳號與同步」重新試一次。' })
-        } else {
-          // 綁定失敗：最可能是這個 Google 之前已綁過，提供「取回資料」當下一步
-          setNotice({
-            type: 'err',
-            text: '綁定沒有成功。如果這個 Google 之前綁定過，請改用「取回資料」。',
-            actionLabel: '取回資料',
-            onAction: () => { signInWithGoogle() },
-          })
-        }
-      })()
+    // 一切正常（含 OAuth 成功的 ?code=）→ 清掉自動取回旗標，結束
+    if (!hashErr && !queryErr && !type) {
+      sessionStorage.removeItem(RETRY_FLAG)
       return
     }
 
+    const clearHash = () => history.replaceState(null, '', window.location.pathname)
+
+    // ── Google OAuth 失敗（query）：多半是這個 Google 已綁到既有帳號 → 自動帶去登入取回 ──
+    if (queryErr) {
+      clearHash()
+      const alreadyTried = sessionStorage.getItem(RETRY_FLAG)
+      if (!alreadyTried) {
+        sessionStorage.setItem(RETRY_FLAG, '1')
+        setNotice({ type: 'ok', text: '這個 Google 已經有帳號了，正在帶你登入取回資料…' })
+        signInWithGoogle().then(({ error }) => {
+          if (error) {
+            sessionStorage.removeItem(RETRY_FLAG)
+            setNotice({ type: 'err', text: '取回資料沒有成功，請再試一次。', actionLabel: '重試', onAction: () => signInWithGoogle() })
+          }
+          // 成功會跳轉，不會走到這
+        })
+      } else {
+        sessionStorage.removeItem(RETRY_FLAG)
+        setNotice({ type: 'err', text: '取回資料沒有成功，請再試一次。', actionLabel: '用 Google 重試', onAction: () => signInWithGoogle() })
+      }
+      return
+    }
+
+    // ── Email 連結失敗（hash）──
+    if (hashErr) {
+      clearHash()
+      const expired = /expired|otp/i.test(`${hashErr}`)
+      setNotice({
+        type: 'err',
+        text: expired
+          ? '這個連結已過期或用過了，請回「設定 → 帳號與同步」重新試一次。'
+          : '連結驗證沒有成功，請回「設定 → 帳號與同步」再試一次。',
+      })
+      return
+    }
+
+    // ── Email 連結成功 ──
     if (type && /magiclink|recovery/.test(type)) {
+      sessionStorage.removeItem(RETRY_FLAG)
       setNotice({ type: 'ok', text: '已切換到你的帳號，資料已取回 🎉' })
       clearHash()
     } else if (type && /email_change|signup/.test(type)) {
+      sessionStorage.removeItem(RETRY_FLAG)
       setNotice({ type: 'ok', text: '已綁定 Email！之後換裝置就能用這個 Email 取回資料 🎉' })
       clearHash()
     }
