@@ -6,10 +6,13 @@ import QuickActionsPage from './pages/QuickActionsPage'
 import RecordsPage from './pages/RecordsPage'
 import StatsPage from './pages/StatsPage'
 import CalendarPage from './pages/CalendarPage'
+import SettingsPage from './pages/SettingsPage'
+import AuthHashNotice from './components/AuthHashNotice'
 
 export default function App() {
   return (
     <Router basename="/pikmin-bloom-tracker">
+      <AuthHashNotice />
       <Navbar />
       <main className="flex-1 pb-32 pt-6 md:pb-16 md:pt-8 max-w-full md:max-w-6xl mx-auto w-full px-4 md:px-6">
         <Routes>
@@ -19,6 +22,7 @@ export default function App() {
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/stats" element={<StatsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
     </Router>

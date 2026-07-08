@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Check } from 'lucide-react'
-import { ItemType, ActionType, Person, RecordItem } from '../types'
+import { ItemType, ActionType, Person, RecordItem, RecordFormValues } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel } from '../lib/recordLabels'
 
 const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
@@ -22,15 +22,6 @@ const DATE_SHORTCUTS = [
   { label: '昨天', offset: 1 },
   { label: '前天', offset: 2 },
 ]
-
-export interface RecordFormValues {
-  personId: string
-  personNameSnapshot: string
-  date: string
-  itemType: ItemType
-  actionType: ActionType
-  note?: string
-}
 
 interface RecordFormProps {
   people: Person[]

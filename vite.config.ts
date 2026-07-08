@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
+import path from 'path'
 
 export default defineConfig({
   base: '/pikmin-bloom-tracker/',
@@ -9,43 +9,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png'],
+      includeAssets: ['apple-touch-icon.png', 'guide.html'],
       manifest: {
-        name: 'PikLog 紀錄器',
+        name: 'PikLog — Pikmin Bloom 互動紀錄器',
         short_name: 'PikLog',
-        description: '長輩友善的 Pikmin Bloom 明信片與打蘑菇互動紀錄工具',
+        description: '長輩友善的明信片收發與打蘑菇互動紀錄工具',
+        lang: 'zh-Hant',
         theme_color: '#65a30d',
         background_color: '#fafaf9',
         display: 'standalone',
-        orientation: 'portrait',
-        scope: '/pikmin-bloom-tracker/',
-        start_url: '/pikmin-bloom-tracker/',
-        lang: 'zh-TW',
+        // start_url / scope 由外掛依 base 自動帶入 /pikmin-bloom-tracker/
         icons: [
-          {
-            src: 'icons/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache',
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
-            },
-          },
+          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
     }),

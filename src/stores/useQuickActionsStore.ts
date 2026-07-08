@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { QuickAction } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { getSessionUserId } from '../lib/auth'
 
 interface QuickActionsState {
   quickActions: QuickAction[]
@@ -32,6 +33,30 @@ const saveLocalQuickActions = (actions: QuickAction[]) => {
   } catch {}
 }
 
+async function migrateLocalToCloud(userId: string, localActions: QuickAction[]): Promise<void> {
+  if (!localActions.length) return
+  const flag = 'piklog_cloud_synced_qa_' + userId
+  if (localStorage.getItem(flag)) return
+
+  const rows = localActions.map(a => ({
+    id: a.id,
+    user_id: userId,
+    label: a.label,
+    person_id: a.personId,
+    item_type: a.itemType,
+    action_type: a.actionType,
+    use_today: a.useToday,
+    sort_order: a.sortOrder,
+    created_at: a.createdAt,
+  }))
+
+  const { error } = await supabase
+    .from('quick_actions')
+    .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
+
+  if (!error) localStorage.setItem(flag, '1')
+}
+
 export const useQuickActionsStore = create<QuickActionsState>((set) => ({
   quickActions: getLocalQuickActions(),
   loading: false,
@@ -46,14 +71,38 @@ export const useQuickActionsStore = create<QuickActionsState>((set) => ({
     }
 
     try {
-      const { data, error } = await supabase
-        .from('quick_actions')
-        .select('*')
-        .order('sort_order', { ascending: true })
+      const userId = await getSessionUserId()
+      let query = supabase.from('quick_actions').select('*').order('sort_order', { ascending: true })
+      if (userId) query = query.eq('user_id', userId)
+      const { data, error } = await query
 
       if (error) throw error
 
       if (data) {
+        if (data.length === 0 && userId) {
+          await migrateLocalToCloud(userId, getLocalQuickActions())
+          const { data: migrated } = await supabase
+            .from('quick_actions')
+            .select('*')
+            .eq('user_id', userId)
+            .order('sort_order', { ascending: true })
+          if (migrated?.length) {
+            const mapped: QuickAction[] = migrated.map((a, i) => ({
+              id: a.id,
+              label: a.label,
+              personId: a.person_id,
+              itemType: a.item_type,
+              actionType: a.action_type,
+              useToday: a.use_today,
+              sortOrder: a.sort_order ?? i,
+              createdAt: a.created_at,
+            }))
+            saveLocalQuickActions(mapped)
+            set({ quickActions: mapped, loading: false })
+            return
+          }
+        }
+
         const mapped: QuickAction[] = data.map((a, i) => ({
           id: a.id,
           label: a.label,
@@ -89,8 +138,10 @@ export const useQuickActionsStore = create<QuickActionsState>((set) => ({
     }
 
     try {
+      const userId = await getSessionUserId()
       const { error } = await supabase.from('quick_actions').insert([{
         id,
+        user_id: userId,
         label: data.label,
         person_id: data.personId,
         item_type: data.itemType,

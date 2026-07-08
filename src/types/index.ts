@@ -22,6 +22,15 @@ export interface RecordItem {
   createdAt: string;
 }
 
+export interface RecordFormValues {
+  personId: string;
+  personNameSnapshot: string;
+  date: string;
+  itemType: ItemType;
+  actionType: ActionType;
+  note?: string;
+}
+
 export interface QuickAction {
   id: string;
   label: string;

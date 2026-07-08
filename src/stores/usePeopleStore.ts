@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Person } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { getSessionUserId } from '../lib/auth'
 
 interface PeopleState {
   people: Person[]
@@ -35,6 +36,29 @@ const saveLocalPeople = (people: Person[]) => {
   }
 }
 
+async function migrateLocalToCloud(userId: string, localPeople: Person[]): Promise<void> {
+  if (!localPeople.length) return
+  const flag = 'piklog_cloud_synced_people_' + userId
+  if (localStorage.getItem(flag)) return
+
+  const rows = localPeople.map(p => ({
+    id: p.id,
+    user_id: userId,
+    name: p.name,
+    nickname: p.nickname || null,
+    color: p.color || '#6B7280',
+    icon: p.icon || null,
+    sort_order: p.sortOrder,
+    created_at: p.createdAt,
+  }))
+
+  const { error } = await supabase
+    .from('persons')
+    .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
+
+  if (!error) localStorage.setItem(flag, '1')
+}
+
 export const usePeopleStore = create<PeopleState>((set, get) => ({
   people: getLocalPeople(),
   loading: false,
@@ -49,14 +73,37 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     }
 
     try {
-      const { data, error } = await supabase
-        .from('persons')
-        .select('*')
-        .order('sort_order', { ascending: true })
+      const userId = await getSessionUserId()
+      let query = supabase.from('persons').select('*').order('sort_order', { ascending: true })
+      if (userId) query = query.eq('user_id', userId)
+      const { data, error } = await query
 
       if (error) throw error
 
       if (data) {
+        if (data.length === 0 && userId) {
+          await migrateLocalToCloud(userId, getLocalPeople())
+          const { data: migrated } = await supabase
+            .from('persons')
+            .select('*')
+            .eq('user_id', userId)
+            .order('sort_order', { ascending: true })
+          if (migrated?.length) {
+            const mapped: Person[] = migrated.map((p, i) => ({
+              id: p.id,
+              name: p.name,
+              nickname: p.nickname || undefined,
+              color: p.color || undefined,
+              icon: p.icon || undefined,
+              sortOrder: p.sort_order ?? i,
+              createdAt: p.created_at,
+            }))
+            saveLocalPeople(mapped)
+            set({ people: mapped, loading: false })
+            return
+          }
+        }
+
         const mappedPeople: Person[] = data.map((p, i) => ({
           id: p.id,
           name: p.name,
@@ -111,10 +158,12 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     }
 
     try {
+      const userId = await getSessionUserId()
       const { data, error } = await supabase
         .from('persons')
         .insert([{
           id: newPersonId,
+          user_id: userId,
           name,
           nickname: nickname || null,
           color: color || '#6B7280',

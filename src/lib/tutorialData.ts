@@ -31,6 +31,11 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
       title: '📚 其他功能入口',
       content: '點這三張卡片可以進入人物管理、互動紀錄和統計分析，以後慢慢探索！',
     },
+    {
+      selector: '[data-tutorial="help-btn"]',
+      title: '🔁 想複習就點這裡',
+      content: '以後忘記怎麼用，點右上角這顆「？」就能重看本頁的說明喔！',
+    },
   ],
 
   people: [
@@ -57,6 +62,11 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
       selector: '[data-tutorial="people-qa-btn"]',
       title: '⚡ 快捷動作設定',
       content: '加好好友後，按這裡去設定快捷動作！設完後首頁會多出彩色的一鍵紀錄按鈕，記錄從此超快速 🚀',
+    },
+    {
+      selector: '[data-tutorial="help-btn"]',
+      title: '🔁 想複習就點這裡',
+      content: '以後忘記怎麼用，點右上角這顆「？」就能重看本頁的說明喔！',
     },
   ],
 
@@ -92,6 +102,11 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
       title: '📝 紀錄清單',
       content: '所有互動從最新的排到最舊。點任何一筆可以編輯或刪除，記錯了也不怕 😌',
     },
+    {
+      selector: '[data-tutorial="help-btn"]',
+      title: '🔁 想複習就點這裡',
+      content: '以後忘記怎麼用，點右上角這顆「？」就能重看本頁的說明喔！',
+    },
   ],
 
   calendar: [
@@ -114,6 +129,11 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
       title: '👇 點日期看明細',
       content: '點任何一天，下方就會展開當天的互動清單。今天是哪些好友見面了呢？🍄',
     },
+    {
+      selector: '[data-tutorial="help-btn"]',
+      title: '🔁 想複習就點這裡',
+      content: '以後忘記怎麼用，點右上角這顆「？」就能重看本頁的說明喔！',
+    },
   ],
 
   stats: [
@@ -131,32 +151,37 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
       title: '🏆 互動排行',
       content: '互動次數最多的好友排在最前面～快來看看誰是你最常聯絡的皮克敏好友 🎖️',
     },
+    {
+      selector: '[data-tutorial="help-btn"]',
+      title: '🔁 想複習就點這裡',
+      content: '以後忘記怎麼用，點右上角這顆「？」就能重看本頁的說明喔！',
+    },
   ],
 }
 
 export const TUTORIAL_COMPLETE: Record<string, { title: string; content: string }> = {
   home: {
     title: '首頁導覽完成！🎉',
-    content: '已經認識首頁啦！之後不清楚的話，按右下角的小 ？ 隨時重看說明喔～',
+    content: '已經認識首頁啦！之後不清楚的話，按右上角的小 ？ 隨時重看說明喔～',
   },
   people: {
     title: '人物管理搞定！🍄',
-    content: '加好好友之後，記得去設定快捷動作，讓記錄更輕鬆！有問題隨時按 ？ 回來看說明。',
+    content: '加好好友之後，記得去設定快捷動作，讓記錄更輕鬆！有問題按右上角的 ？ 回來看說明。',
   },
   quickActions: {
     title: '快捷動作設定完成！⚡',
-    content: '設好之後回首頁就能看到彩色的一鍵按鈕啦！有不清楚的按 ？ 隨時重看 🍄',
+    content: '設好之後回首頁就能看到彩色的一鍵按鈕啦！有不清楚的按右上角的 ？ 隨時重看 🍄',
   },
   records: {
     title: '紀錄頁面了解了！📮',
-    content: '記錄都在這裡，隨時找得到。若有需要按 ？ 重看說明喔！',
+    content: '記錄都在這裡，隨時找得到。若有需要按右上角的 ？ 重看說明喔！',
   },
   calendar: {
     title: '月曆通了！📅',
-    content: '現在知道怎麼用月曆查互動了！有問題按 ？ 隨時復習 🌸',
+    content: '現在知道怎麼用月曆查互動了！有問題按右上角的 ？ 隨時復習 🌸',
   },
   stats: {
     title: '統計看懂了！📊',
-    content: '多跟好友互動，讓排行更豐富吧！若有問題隨時按 ？ 喔 🍄',
+    content: '多跟好友互動，讓排行更豐富吧！若有問題按右上角的 ？ 喔 🍄',
   },
 }
