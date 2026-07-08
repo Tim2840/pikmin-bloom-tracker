@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarDays, HelpCircle } from 'lucide-react'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { RecordItem } from '../types'
@@ -7,6 +7,9 @@ import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import {
   buildMonthGrid, WEEKDAY_LABELS, MONTH_LABEL, shiftMonth, todayStr, formatDateLong,
 } from '../lib/dateUtils'
+import TutorialOverlay from '../components/TutorialOverlay'
+import { useTutorial } from '../hooks/useTutorial'
+import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
 export default function CalendarPage() {
   const { records, fetchRecords } = useRecordsStore()
@@ -58,6 +61,9 @@ export default function CalendarPage() {
     return '#84cc16' // lime-500 fallback
   }
 
+  const tutSteps = TUTORIAL_STEPS.calendar
+  const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('calendar', tutSteps.length)
+
   const selectedRecords = selectedDate ? byDate.get(selectedDate) ?? [] : []
   const monthRecordCount = useMemo(
     () => cells.filter(c => c.inMonth).reduce((sum, c) => sum + (byDate.get(c.date)?.length ?? 0), 0),
@@ -85,7 +91,7 @@ export default function CalendarPage() {
       {/* 月曆卡 */}
       <div className="glass-card rounded-3xl p-4 md:p-6">
         {/* 月份切換列 */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-5" data-tutorial="cal-nav">
           <button
             onClick={goPrev}
             className="accessible-target flex items-center justify-center w-12 h-12 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-600 transition-colors"
@@ -123,7 +129,7 @@ export default function CalendarPage() {
         </div>
 
         {/* 日期格 */}
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
+        <div className="grid grid-cols-7 gap-1 md:gap-2" data-tutorial="cal-grid">
           {cells.map(cell => {
             const dayRecords = byDate.get(cell.date) ?? []
             const count = dayRecords.length
@@ -172,6 +178,7 @@ export default function CalendarPage() {
       </div>
 
       {/* 選定日期的紀錄明細（inline 展開） */}
+      <div data-tutorial="cal-detail">
       {selectedDate && (
         <div className="mt-5 glass-card rounded-3xl p-5 animate-scale-up">
           <h3 className="font-black text-stone-800 mb-4 flex items-center gap-2">
@@ -206,6 +213,28 @@ export default function CalendarPage() {
           )}
         </div>
       )}
+      </div>{/* end cal-detail */}
+
+      {/* 說明按鈕 */}
+      <button
+        onClick={startTutorial}
+        className="fixed right-4 bottom-24 md:bottom-6 z-50 w-10 h-10 rounded-full bg-white border-2 border-lime-400 text-lime-600 shadow-md hover:bg-lime-50 hover:border-lime-500 transition-all active:scale-90 flex items-center justify-center"
+        title="查看使用說明"
+      >
+        <HelpCircle className="w-5 h-5" />
+      </button>
+
+      {/* 教學遮罩 */}
+      <TutorialOverlay
+        steps={tutSteps}
+        currentStep={tutStep}
+        isOpen={tutOpen}
+        isComplete={tutDone}
+        completionMsg={TUTORIAL_COMPLETE.calendar}
+        onNext={tutNext}
+        onSkip={tutSkip}
+        onCompleteClose={tutClose}
+      />
     </div>
   )
 }

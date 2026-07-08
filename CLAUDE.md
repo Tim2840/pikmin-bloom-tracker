@@ -43,6 +43,26 @@
 - 提交多行訊息時，這個 Bash 工具是 **bash**（非 PowerShell），用 heredoc：
   `git commit -F - <<'EOF' ... EOF`，**不要**用 PowerShell here-string（`@'...'@` 會把 `@` 混進訊息）
 
+## GitHub Pages 部署規則（血淚教訓，勿跳過）
+
+### push 前五步 SOP
+1. `git status` → 確認沒有漏 add 的新檔案（Untracked files）
+2. `npm run build` → 本地 build 必須成功才能 push
+3. `git diff HEAD` → 確認改動範圍正確
+4. `git push`
+5. 看 GitHub Actions 綠勾 → 開 `https://tim2840.github.io/pikmin-bloom-tracker/` 驗收
+
+### 常見地雷
+- **新增頁面/檔案**：`git add -A` 或逐一確認，App.tsx 加了 import 但忘 add 新檔案 → CI 必死
+- **新裝套件**：一律 `npm install <pkg>`（不要只 `npm i`），確認 package.json 更新後立刻 commit
+- **vite.config.ts**：必須有 `base: '/pikmin-bloom-tracker/'`，少了這行 JS/CSS 全 404
+- **react-router-dom**：`<Router basename="/pikmin-bloom-tracker">` 必須與 vite base 一致
+- **沙盒讀檔**：不要 `rsync` 或 `cat` 從 `/sessions/.../mnt/` 讀大檔案，會截斷；改用 Read tool 讀 Windows 原始路徑
+
+### GitHub Token
+- 有效期設 **No expiration** 或至少 90 天，1 天 token 跨日就廢
+- 必要 scope：`repo` + `workflow`（少 workflow 無法 push `.github/workflows/`）
+
 ## 推薦的審查時機
 
 - commit 前：`/code-review`
