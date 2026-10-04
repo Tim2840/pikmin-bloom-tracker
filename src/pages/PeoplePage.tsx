@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePeopleStore } from '../stores/usePeopleStore'
+import { usePeopleStore, MAX_PEOPLE } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import {
   UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
@@ -87,8 +87,8 @@ export default function PeoplePage() {
       showToast('請輸入名字！', 'error')
       return
     }
-    if (people.length >= 20) {
-      showToast('好友名單最多 20 位！', 'error')
+    if (people.length >= MAX_PEOPLE) {
+      showToast(`好友名單最多 ${MAX_PEOPLE} 位！`, 'error')
       return
     }
     const success = await addPerson(name.trim(), nickname.trim(), selectedCountry, selectedIcon)
@@ -159,7 +159,7 @@ export default function PeoplePage() {
           <h1 className="text-2xl md:text-3xl font-black text-stone-850 tracking-tight flex items-center">
             👥 人物管理
           </h1>
-          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單（最多 20 位）</p>
+          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單（最多 {MAX_PEOPLE} 位）</p>
         </div>
         <button
           data-tutorial="people-qa-btn"

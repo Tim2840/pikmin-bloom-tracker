@@ -3,6 +3,9 @@ import { Person } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { getSessionUserId } from '../lib/auth'
 import { colorForCountry } from '../lib/countries'
+import { mergeWithLocal } from '../lib/syncMerge'
+
+export const MAX_PEOPLE = 100
 
 interface PeopleState {
   people: Person[]
@@ -39,8 +42,6 @@ const saveLocalPeople = (people: Person[]) => {
 
 async function migrateLocalToCloud(userId: string, localPeople: Person[]): Promise<void> {
   if (!localPeople.length) return
-  const flag = 'piklog_cloud_synced_people_' + userId
-  if (localStorage.getItem(flag)) return
 
   const rows = localPeople.map(p => ({
     id: p.id,
@@ -54,11 +55,18 @@ async function migrateLocalToCloud(userId: string, localPeople: Person[]): Promi
     created_at: p.createdAt,
   }))
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from('persons')
     .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
 
-  if (!error) localStorage.setItem(flag, '1')
+  // 雲端尚未執行 migration 004（沒有 country 欄位）時，退回不含 country 再傳一次
+  if (error && /country/i.test(error.message)) {
+    const withoutCountry = rows.map(({ country: _c, ...rest }) => rest)
+    ;({ error } = await supabase
+      .from('persons')
+      .upsert(withoutCountry, { onConflict: 'id', ignoreDuplicates: true }))
+  }
+  if (error) console.error('本機好友補傳雲端失敗:', error)
 }
 
 export const usePeopleStore = create<PeopleState>((set, get) => ({
@@ -83,43 +91,24 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
       if (error) throw error
 
       if (data) {
-        if (data.length === 0 && userId) {
-          await migrateLocalToCloud(userId, getLocalPeople())
-          const { data: migrated } = await supabase
-            .from('persons')
-            .select('*')
-            .eq('user_id', userId)
-            .order('sort_order', { ascending: true })
-          if (migrated?.length) {
-            const mapped: Person[] = migrated.map((p, i) => ({
-              id: p.id,
-              name: p.name,
-              nickname: p.nickname || undefined,
-              color: p.color || undefined,
-              country: p.country || undefined,
-              icon: p.icon || undefined,
-              sortOrder: p.sort_order ?? i,
-              createdAt: p.created_at,
-            }))
-            saveLocalPeople(mapped)
-            set({ people: mapped, loading: false })
-            return
-          }
-        }
-
-        const mappedPeople: Person[] = data.map((p, i) => ({
+        const cloudPeople: Person[] = data.map((p, i) => ({
           id: p.id,
           name: p.name,
           nickname: p.nickname || undefined,
           color: p.color || undefined,
-              country: p.country || undefined,
+          country: p.country || undefined,
           icon: p.icon || undefined,
           sortOrder: p.sort_order ?? i,
           createdAt: p.created_at,
         }))
 
-        saveLocalPeople(mappedPeople)
-        set({ people: mappedPeople, loading: false })
+        // 與本機合併（不覆蓋）；本機獨有的補傳雲端
+        const { merged, localOnly } = mergeWithLocal(cloudPeople, getLocalPeople())
+        if (userId && localOnly.length) await migrateLocalToCloud(userId, localOnly)
+
+        const finalPeople = merged.sort((a, b) => a.sortOrder - b.sortOrder)
+        saveLocalPeople(finalPeople)
+        set({ people: finalPeople, loading: false })
       }
     } catch (err: any) {
       console.error('從 Supabase 讀取人物失敗，改用 LocalStorage:', err)
@@ -133,8 +122,8 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
 
   addPerson: async (name, nickname, country, icon) => {
     const current = get().people
-    if (current.length >= 20) {
-      set({ error: '好友名單最多新增 20 位！' })
+    if (current.length >= MAX_PEOPLE) {
+      set({ error: `好友名單最多新增 ${MAX_PEOPLE} 位！` })
       return false
     }
 

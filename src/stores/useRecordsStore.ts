@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { RecordItem } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { getSessionUserId } from '../lib/auth'
+import { mergeWithLocal } from '../lib/syncMerge'
 
 interface RecordsState {
   records: RecordItem[]
@@ -14,7 +15,6 @@ interface RecordsState {
 }
 
 const LOCAL_KEY = 'piklog_records'
-const SYNC_FLAG_PREFIX = 'piklog_cloud_synced_'
 
 const getLocalRecords = (): RecordItem[] => {
   try {
@@ -34,8 +34,6 @@ const saveLocalRecords = (records: RecordItem[]) => {
 // 首次啟用 auth 時，把本地資料 upsert 到 Supabase（只跑一次）
 async function migrateLocalToCloud(userId: string, localRecords: RecordItem[]): Promise<void> {
   if (!localRecords.length) return
-  const flag = SYNC_FLAG_PREFIX + userId
-  if (localStorage.getItem(flag)) return
 
   const rows = localRecords.map(r => ({
     id: r.id,
@@ -53,9 +51,7 @@ async function migrateLocalToCloud(userId: string, localRecords: RecordItem[]): 
     .from('records')
     .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
 
-  if (!error) {
-    localStorage.setItem(flag, '1')
-  }
+  if (error) console.error('本機紀錄補傳雲端失敗:', error)
 }
 
 const mapRow = (r: any): RecordItem => ({
@@ -99,28 +95,14 @@ export const useRecordsStore = create<RecordsState>((set) => ({
       if (error) throw error
 
       if (data) {
-        // 若雲端無資料但本地有，嘗試遷移舊資料
-        if (data.length === 0 && userId) {
-          await migrateLocalToCloud(userId, getLocalRecords())
-          // 遷移後重新 fetch
-          const { data: migrated } = await supabase
-            .from('records')
-            .select('*')
-            .eq('user_id', userId)
-            .order('date', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(200)
-          if (migrated?.length) {
-            const mapped = migrated.map(mapRow)
-            saveLocalRecords(mapped)
-            set({ records: mapped, loading: false })
-            return
-          }
-        }
+        // 與本機合併（不覆蓋）；本機獨有的補傳雲端
+        const { merged, localOnly } = mergeWithLocal(data.map(mapRow), getLocalRecords())
+        if (userId && localOnly.length) await migrateLocalToCloud(userId, localOnly)
 
-        const mapped = data.map(mapRow)
-        saveLocalRecords(mapped)
-        set({ records: mapped, loading: false })
+        const finalRecords = merged.sort((a, b) =>
+          b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
+        saveLocalRecords(finalRecords)
+        set({ records: finalRecords, loading: false })
       }
     } catch (err: any) {
       set({ records: getLocalRecords(), loading: false, error: err.message })

@@ -39,6 +39,12 @@
 - `color` 欄位保留，由國家代碼自動對應（供首頁/月曆/統計區分好友），舊資料沿用原色。
 - 🔲 **需在 Supabase SQL Editor 執行 `supabase/migrations/004_add_person_country.sql`**，否則寫入雲端時 `country` 欄位不存在（本地仍正常）。
 
+## 同步合併（防資料消失）
+- 修正：舊版 `fetch*` 在雲端有/無資料時會**直接覆蓋本機**；若寫入雲端失敗（斷線、專案暫停、缺 `country` 欄位）重新整理後本機資料會被清空。
+- 現在改為 `src/lib/syncMerge.ts` 聯集合併（同 id 雲端為準），本機獨有的資料自動補傳雲端。三個 store 皆適用。
+- 好友上限 20 → 100（`MAX_PEOPLE`，在 `usePeopleStore.ts`）。
+- 取捨：A 裝置刪除、B 裝置本機仍有時，B 重新整理會把它補傳回來（寧可多不可少）。
+
 ## 待驗收 / 已知事項
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
