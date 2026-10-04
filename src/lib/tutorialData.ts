@@ -46,12 +46,12 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
     {
       selector: '[data-tutorial="people-form"]',
       title: '✏️ 建立新人物',
-      content: '填入好友名字，選一個代表色和圖樣，按「建立新人物」就加進去了！超簡單的 😊',
+      content: '填入好友名字，選好友所在的國家和圖樣，按「建立新人物」就加進去了！超簡單的 😊',
     },
     {
-      selector: '[data-tutorial="people-colors"]',
-      title: '🎨 選代表顏色',
-      content: '每位好友有自己的顏色！之後首頁的快速紀錄按鈕就會顯示這個顏色，一眼就認得出來 🌈',
+      selector: '[data-tutorial="people-country"]',
+      title: '🌏 選擇國家',
+      content: '記下好友來自哪個國家！名冊裡會顯示國旗，一眼就知道是哪裡的朋友 🌍',
     },
     {
       selector: '[data-tutorial="people-list"]',
@@ -122,7 +122,7 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
     {
       selector: '[data-tutorial="cal-grid"]',
       title: '🌸 彩色圓點',
-      content: '有互動的日期上面會出現彩色圓點，顏色對應好友的代表色。哪幾天最熱鬧一眼就看出來！',
+      content: '有互動的日期上面會出現彩色圓點，顏色依好友所屬國家而定。哪幾天最熱鬧一眼就看出來！',
     },
     {
       selector: '[data-tutorial="cal-detail"]',

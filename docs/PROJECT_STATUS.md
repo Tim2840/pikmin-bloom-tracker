@@ -34,7 +34,13 @@
 - ✅ GitHub repo secrets：`VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`（部署 build 時注入）。
 - anon key 為公開金鑰（受 RLS 保護）；`service_role` 不可外洩。
 
+## 人物「國家」（取代代表顏色）
+- 人物表單改選國家（`src/lib/countries.ts`，ISO 代碼 → 旗幟 + 繁中國名）；移除顏色選擇器與「紅/綠皮敏」文案。
+- `color` 欄位保留，由國家代碼自動對應（供首頁/月曆/統計區分好友），舊資料沿用原色。
+- 🔲 **需在 Supabase SQL Editor 執行 `supabase/migrations/004_add_person_country.sql`**，否則寫入雲端時 `country` 欄位不存在（本地仍正常）。
+
 ## 待驗收 / 已知事項
+- 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
 - ℹ️ npm audit 5 個漏洞**全為 dev 相依**（`npm audit --omit=dev` = 0），不影響線上。
 - ℹ️ PWA 蘑菇圖示需「刪舊捷徑 → 清快取 → 重新安裝」才會更新。

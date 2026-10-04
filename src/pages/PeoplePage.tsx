@@ -7,21 +7,13 @@ import {
   Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield,
   ChevronUp, ChevronDown, Zap, HelpCircle,
 } from 'lucide-react'
+import { COUNTRY_CODES, countryLabel, countryFlag, countryName } from '../lib/countries'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
-// 預設的高對比亮麗 Pikmin 色系，長輩易點選與辨識
-const COLOR_PRESETS = [
-  { value: '#EF4444', label: '紅皮敏' },
-  { value: '#FBBF24', label: '黃皮敏' },
-  { value: '#3B82F6', label: '藍皮敏' },
-  { value: '#EC4899', label: '粉皮敏' },
-  { value: '#8B5CF6', label: '紫皮敏' },
-  { value: '#10B981', label: '綠皮敏' },
-  { value: '#F97316', label: '橘皮敏' },
-  { value: '#6B7280', label: '灰皮敏' }
-]
+// 圖樣選中時的強調色（國家取代了原本的代表顏色）
+const ACCENT = '#65A30D'
 
 // 預設的 Lucide 圖標庫，供長輩代表不同好友類別
 const ICON_PRESETS = [
@@ -40,6 +32,21 @@ const getIconComponent = (iconName: string | undefined) => {
   return found ? found.component : Smile
 }
 
+function CountrySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full h-12 px-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+    >
+      <option value="">不指定</option>
+      {COUNTRY_CODES.map((code) => (
+        <option key={code} value={code}>{countryFlag(code)} {countryName(code)}</option>
+      ))}
+    </select>
+  )
+}
+
 export default function PeoplePage() {
   const navigate = useNavigate()
   const { people, loading, error, fetchPeople, addPerson, updatePerson, deletePerson, reorderPerson } = usePeopleStore()
@@ -47,14 +54,14 @@ export default function PeoplePage() {
   // 表單狀態
   const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
-  const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0].value)
+  const [selectedCountry, setSelectedCountry] = useState('')
   const [selectedIcon, setSelectedIcon] = useState(ICON_PRESETS[0].value)
 
   // 編輯與刪除狀態
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editNickname, setEditNickname] = useState('')
-  const [editColor, setEditColor] = useState('')
+  const [editCountry, setEditCountry] = useState('')
   const [editIcon, setEditIcon] = useState(ICON_PRESETS[0].value)
 
   const [deletingPersonId, setDeletingPersonId] = useState<string | null>(null)
@@ -84,11 +91,11 @@ export default function PeoplePage() {
       showToast('好友名單最多 20 位！', 'error')
       return
     }
-    const success = await addPerson(name.trim(), nickname.trim(), selectedColor, selectedIcon)
+    const success = await addPerson(name.trim(), nickname.trim(), selectedCountry, selectedIcon)
     if (success) {
       setName('')
       setNickname('')
-      setSelectedColor(COLOR_PRESETS[0].value)
+      setSelectedCountry('')
       setSelectedIcon(ICON_PRESETS[0].value)
       showToast(`成功新增好友：${name}`)
     } else {
@@ -101,7 +108,7 @@ export default function PeoplePage() {
     setEditingPersonId(person.id)
     setEditName(person.name)
     setEditNickname(person.nickname || '')
-    setEditColor(person.color || COLOR_PRESETS[0].value)
+    setEditCountry(person.country || '')
     setEditIcon(person.icon || ICON_PRESETS[0].value)
   }
 
@@ -116,7 +123,7 @@ export default function PeoplePage() {
     const success = await updatePerson(editingPersonId, {
       name: editName.trim(),
       nickname: editNickname.trim(),
-      color: editColor,
+      country: editCountry,
       icon: editIcon
     })
 
@@ -232,39 +239,12 @@ export default function PeoplePage() {
               />
             </div>
 
-            {/* 色彩選擇器 */}
-            <div data-tutorial="people-colors">
-              <label className="block text-sm font-bold text-stone-600 mb-2">
-                代表顏色 <span className="text-stone-400 text-xs font-normal">(大按鈕易於點選)</span>
+            {/* 國家選擇 */}
+            <div data-tutorial="people-country">
+              <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                國家 <span className="text-stone-400 text-xs font-normal">(選填)</span>
               </label>
-              <div className="grid grid-cols-4 gap-2.5">
-                {COLOR_PRESETS.map((preset) => (
-                  <button
-                    key={preset.value}
-                    type="button"
-                    onClick={() => setSelectedColor(preset.value)}
-                    className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
-                    style={{
-                      backgroundColor: selectedColor === preset.value ? `${preset.value}15` : '#FFFFFF',
-                      borderColor: selectedColor === preset.value ? preset.value : '#E5E7EB',
-                      borderWidth: '2px'
-                    }}
-                  >
-                    <span
-                      className="w-7 h-7 rounded-full shadow-inner flex items-center justify-center text-white"
-                      style={{ backgroundColor: preset.value }}
-                    >
-                      {selectedColor === preset.value && <Check className="w-4 h-4" />}
-                    </span>
-                    <span 
-                      className="text-[11px] mt-1 font-bold"
-                      style={{ color: preset.value }}
-                    >
-                      {preset.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <CountrySelect value={selectedCountry} onChange={setSelectedCountry} />
             </div>
 
             {/* 圖標選擇器 */}
@@ -283,18 +263,18 @@ export default function PeoplePage() {
                       onClick={() => setSelectedIcon(preset.value)}
                       className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
                       style={{
-                        backgroundColor: isSelected ? `${selectedColor}15` : '#FFFFFF',
-                        borderColor: isSelected ? selectedColor : '#E5E7EB',
+                        backgroundColor: isSelected ? `${ACCENT}15` : '#FFFFFF',
+                        borderColor: isSelected ? ACCENT : '#E5E7EB',
                         borderWidth: '2px'
                       }}
                     >
                       <IconComponent 
                         className="w-6 h-6 transition-transform" 
-                        style={{ color: isSelected ? selectedColor : '#6B7280' }} 
+                        style={{ color: isSelected ? ACCENT : '#6B7280' }} 
                       />
                       <span 
                         className="text-[11px] mt-1 font-bold"
-                        style={{ color: isSelected ? selectedColor : '#6B7280' }}
+                        style={{ color: isSelected ? ACCENT : '#6B7280' }}
                       >
                         {preset.label}
                       </span>
@@ -372,6 +352,11 @@ export default function PeoplePage() {
                       <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
                         {person.name}
                       </h3>
+                      {person.country && (
+                        <span className="text-sm font-bold text-stone-600 block mt-0.5 truncate">
+                          {countryLabel(person.country)}
+                        </span>
+                      )}
                       {person.nickname && (
                         <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
                           暱稱：{person.nickname}
@@ -439,31 +424,10 @@ export default function PeoplePage() {
                 />
               </div>
 
-              {/* 編輯顏色 */}
+              {/* 編輯國家 */}
               <div>
-                <label className="block text-sm font-bold text-stone-600 mb-2">代表顏色</label>
-                <div className="grid grid-cols-4 gap-2.5">
-                  {COLOR_PRESETS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => setEditColor(preset.value)}
-                      className="accessible-target relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 bg-white"
-                      style={{
-                        backgroundColor: editColor === preset.value ? `${preset.value}15` : '#FFFFFF',
-                        borderColor: editColor === preset.value ? preset.value : '#E5E7EB',
-                        borderWidth: '2px'
-                      }}
-                    >
-                      <span
-                        className="w-6 h-6 rounded-full shadow-inner flex items-center justify-center text-white"
-                        style={{ backgroundColor: preset.value }}
-                      >
-                        {editColor === preset.value && <Check className="w-3 h-3" />}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-sm font-bold text-stone-600 mb-1">國家</label>
+                <CountrySelect value={editCountry} onChange={setEditCountry} />
               </div>
 
               {/* 編輯圖樣 */}
@@ -480,14 +444,14 @@ export default function PeoplePage() {
                         onClick={() => setEditIcon(preset.value)}
                         className="accessible-target relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200 bg-white"
                         style={{
-                          backgroundColor: isSelected ? `${editColor}15` : '#FFFFFF',
-                          borderColor: isSelected ? editColor : '#E5E7EB',
+                          backgroundColor: isSelected ? `${ACCENT}15` : '#FFFFFF',
+                          borderColor: isSelected ? ACCENT : '#E5E7EB',
                           borderWidth: '2px'
                         }}
                       >
                         <IconComponent 
                           className="w-5 h-5" 
-                          style={{ color: isSelected ? editColor : '#6B7280' }} 
+                          style={{ color: isSelected ? ACCENT : '#6B7280' }} 
                         />
                       </button>
                     )

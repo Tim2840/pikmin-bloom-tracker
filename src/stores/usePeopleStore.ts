@@ -2,13 +2,14 @@ import { create } from 'zustand'
 import { Person } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { getSessionUserId } from '../lib/auth'
+import { colorForCountry } from '../lib/countries'
 
 interface PeopleState {
   people: Person[]
   loading: boolean
   error: string | null
   fetchPeople: () => Promise<void>
-  addPerson: (name: string, nickname?: string, color?: string, icon?: string) => Promise<boolean>
+  addPerson: (name: string, nickname?: string, country?: string, icon?: string) => Promise<boolean>
   updatePerson: (id: string, updates: Partial<Omit<Person, 'id' | 'createdAt' | 'sortOrder'>>) => Promise<boolean>
   deletePerson: (id: string) => Promise<boolean>
   reorderPerson: (id: string, direction: 'up' | 'down') => void
@@ -46,7 +47,8 @@ async function migrateLocalToCloud(userId: string, localPeople: Person[]): Promi
     user_id: userId,
     name: p.name,
     nickname: p.nickname || null,
-    color: p.color || '#6B7280',
+    color: p.color || colorForCountry(p.country),
+    country: p.country || null,
     icon: p.icon || null,
     sort_order: p.sortOrder,
     created_at: p.createdAt,
@@ -94,6 +96,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
               name: p.name,
               nickname: p.nickname || undefined,
               color: p.color || undefined,
+              country: p.country || undefined,
               icon: p.icon || undefined,
               sortOrder: p.sort_order ?? i,
               createdAt: p.created_at,
@@ -109,6 +112,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
           name: p.name,
           nickname: p.nickname || undefined,
           color: p.color || undefined,
+              country: p.country || undefined,
           icon: p.icon || undefined,
           sortOrder: p.sort_order ?? i,
           createdAt: p.created_at,
@@ -127,7 +131,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
     }
   },
 
-  addPerson: async (name, nickname, color, icon) => {
+  addPerson: async (name, nickname, country, icon) => {
     const current = get().people
     if (current.length >= 20) {
       set({ error: '好友名單最多新增 20 位！' })
@@ -143,7 +147,8 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
       id: newPersonId,
       name,
       nickname: nickname || undefined,
-      color: color || '#6B7280',
+      color: colorForCountry(country),
+      country: country || undefined,
       icon: icon || undefined,
       sortOrder,
       createdAt: nowIso,
@@ -166,7 +171,8 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
           user_id: userId,
           name,
           nickname: nickname || null,
-          color: color || '#6B7280',
+          color: colorForCountry(country),
+          country: country || null,
           icon: icon || null,
           sort_order: sortOrder,
           created_at: nowIso,
@@ -181,6 +187,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
           name: data[0].name,
           nickname: data[0].nickname || undefined,
           color: data[0].color || undefined,
+          country: data[0].country || undefined,
           icon: data[0].icon || undefined,
           sortOrder: data[0].sort_order ?? sortOrder,
           createdAt: data[0].created_at,
@@ -206,6 +213,8 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
   updatePerson: async (id, updates) => {
     set({ loading: true, error: null })
 
+    if ('country' in updates) updates = { ...updates, color: colorForCountry(updates.country) }
+
     const currentLocal = getLocalPeople()
     const updatedLocal = currentLocal.map((p) =>
       p.id === id ? { ...p, ...updates } : p
@@ -224,6 +233,7 @@ export const usePeopleStore = create<PeopleState>((set, get) => ({
           name: updates.name,
           nickname: updates.nickname || null,
           color: updates.color,
+          country: updates.country || null,
           icon: updates.icon || null,
         })
         .eq('id', id)

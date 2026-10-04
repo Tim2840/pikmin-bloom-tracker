@@ -6,6 +6,7 @@ export interface Person {
   name: string;
   nickname?: string;
   color?: string;
+  country?: string; // ISO 3166-1 alpha-2
   icon?: string;
   sortOrder: number;
   createdAt: string;
