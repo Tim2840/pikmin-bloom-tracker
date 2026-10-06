@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, Mail, ShieldCheck, AlertCircle, LogOut } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { linkGoogle, signOut } from '../lib/auth'
 import GoogleG from '../components/GoogleG'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
-import EmailBackupModal from '../components/EmailBackupModal'
 
 const PRESETS = [
   { label: '小', sub: '90%', value: 0.9 },
@@ -19,7 +18,6 @@ export default function SettingsPage() {
   const { settings, setFontScale, reset } = useSettingsStore()
   const scale = settings.fontScale
   const { user, isAnonymous } = useAuthStore()
-  const [emailModal, setEmailModal] = useState<null | 'backup' | 'restore'>(null)
   const [authError, setAuthError] = useState('')
   const [confirmLogout, setConfirmLogout] = useState(false)
   const dbEnabled = isSupabaseConfigured()
@@ -52,7 +50,6 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full pb-4">
-      {emailModal && <EmailBackupModal mode={emailModal} onClose={() => setEmailModal(null)} />}
       {/* 標題 */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-black text-stone-800 tracking-tight flex items-center gap-2">
@@ -154,25 +151,6 @@ export default function SettingsPage() {
               <p className="text-stone-400 text-sm mt-2">
                 第一次會建立帳號並保存資料；用過的 Google 會自動帶你取回原本的資料。
               </p>
-
-              {/* Email：備援方式 */}
-              <div className="mt-5 pt-4 border-t border-stone-100">
-                <p className="text-stone-400 text-sm mb-2">沒有 Google？也可以用 Email 綁定：</p>
-                <div className="flex flex-wrap gap-x-5 gap-y-2">
-                  <button
-                    onClick={() => setEmailModal('backup')}
-                    className="accessible-target inline-flex items-center gap-1.5 text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
-                  >
-                    <Mail className="w-4 h-4" /> 綁定 Email
-                  </button>
-                  <button
-                    onClick={() => setEmailModal('restore')}
-                    className="accessible-target text-base font-bold text-sky-700 hover:text-sky-800 underline underline-offset-2"
-                  >
-                    換了裝置？用 Email 取回資料
-                  </button>
-                </div>
-              </div>
             </>
           ) : (
             <div className="space-y-3">
@@ -193,7 +171,7 @@ export default function SettingsPage() {
               ) : (
                 <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
                   <p className="text-stone-700 text-sm leading-relaxed mb-3">
-                    登出後這台裝置會清空紀錄，需要重新綁定 Google／Email 才能把資料取回來。確定要登出嗎？
+                    登出後這台裝置會清空紀錄，需要重新用 Google 繼續才能把資料取回來。確定要登出嗎？
                   </p>
                   <div className="flex gap-3">
                     <button

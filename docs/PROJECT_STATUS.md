@@ -20,7 +20,7 @@
 - **本機資料遷移**：首次有 session 時把 localStorage 既有資料 upsert 上雲（見各 store 的 `migrateLocalToCloud`，旗標 `piklog_cloud_synced_<uid>`）。
 - **帳號（設定頁「帳號與同步」+ 首次提醒 Modal）**：
   - **「用 Google 繼續」一顆按鈕**（`linkGoogle` = linkIdentity 綁定為主）。若該 Google 已綁過、OAuth 導回帶 error → `AuthHashNotice` **自動觸發 `signInWithGoogle` 取回**，以 `sessionStorage['piklog_auth_auto_restore']` 旗標防無限跳轉。
-  - **Email 備援**：`綁定 Email`(linkEmail) / `換裝置取回`(signInWithEmail，magic link)。
+  - **Email 綁定功能已移除**（只留 Google）。先前用 Email 綁定的帳號，改用同一個 Gmail 的 Google 登入即可取回（Supabase 會依相同 email 對應）。`AuthHashNotice` 仍保留 Email 連結導回的處理（舊信件相容）。
   - **登出**：清本機資料 + signOut + reload → 回到新匿名帳號 + 提示（含二次確認）。
 - **用語慣例**：用「綁定 / 取回資料」，**不要用「備份 / 登入」**。換裝置動作叫「取回資料」。
 - 關鍵檔：`src/lib/auth.ts`、`src/stores/useAuthStore.ts`、`src/components/AuthHashNotice.tsx`、`src/components/EmailBackupModal.tsx`、`src/components/BackupReminderModal.tsx`、`src/pages/SettingsPage.tsx`。
@@ -60,5 +60,6 @@
 
 ## 重要雲端/帳號慣例（勿違反）
 - 所有 user-facing 文案用「綁定 / 取回資料」，避免「備份 / 登入」。
-- Google 入口只留一顆「用 Google 繼續」；不要再加獨立「取回」按鈕（自動處理）。
+- Google 入口只留一顆「用 Google 繼續」；不要再加獨立「取回」按鈕（自動處理）。不要再加回 Email 綁定。
+- iPhone：Safari 與「加到主畫面」的 App 儲存/登入各自獨立，同時用兩邊會變成兩個帳號；建議只用一邊。
 - 動 auth 流程時，務必保留：匿名 fallback、本機資料遷移、AuthHashNotice 的防跳轉旗標。

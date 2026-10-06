@@ -16,30 +16,6 @@ export async function ensureSession(): Promise<void> {
   }
 }
 
-// 傳送 Email 確認信，匿名帳號升格為記名帳號（資料不丟失）
-// 明確指定 emailRedirectTo 導回「線上 App」，避免落到 Supabase 預設的 localhost。
-// （注意：此網址仍須在 Supabase Auth 的 Site URL / Redirect URLs 允許清單內才會生效）
-export async function linkEmail(email: string): Promise<{ error: string | null }> {
-  if (!isSupabaseConfigured()) return { error: '尚未設定雲端同步' }
-  const emailRedirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`
-  const { error } = await supabase.auth.updateUser({ email }, { emailRedirectTo })
-  if (error) return { error: error.message }
-  return { error: null }
-}
-
-// 已有帳號者（換裝置/清快取後）：寄登入連結，點了就以該 Email 的帳號登入並還原資料。
-// shouldCreateUser: false → 若查無此 Email 帳號會回錯誤，不會誤建新帳號。
-export async function signInWithEmail(email: string): Promise<{ error: string | null }> {
-  if (!isSupabaseConfigured()) return { error: '尚未設定雲端同步' }
-  const emailRedirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo, shouldCreateUser: false },
-  })
-  if (error) return { error: error.message }
-  return { error: null }
-}
-
 const appUrl = (): string => `${window.location.origin}${import.meta.env.BASE_URL}`
 
 // 匿名帳號「綁定」Google（保留現有資料）。導向 Google 後再回到線上 App。
