@@ -43,14 +43,15 @@ export default function RecordsPage() {
     [records, filterPersonId, filterItem]
   )
 
+  // 新增後不關閉視窗，停在同一位好友方便連續記錄；按「完成」才關閉
   const handleAdd = async (values: RecordFormValues) => {
     const success = await addRecord(values)
     if (success) {
-      setShowAdd(false)
       showToast(`已記錄：${values.personNameSnapshot} / ${formatDate(values.date)} / ${ITEM_META[values.itemType].label}`)
     } else {
       showToast('新增失敗，請重試。', 'error')
     }
+    return success
   }
 
   const handleEdit = async (values: RecordFormValues) => {
@@ -116,7 +117,7 @@ export default function RecordsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-50 flex items-center ${
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-[60] flex items-center ${
           toast.type === 'success' ? 'bg-sky-600' : 'bg-rose-600'
         }`}>
           {toast.type === 'success' ? <Check className="w-5 h-5 mr-2" /> : <AlertCircle className="w-5 h-5 mr-2" />}
@@ -264,6 +265,8 @@ export default function RecordsPage() {
               submitLabel="儲存紀錄"
               onSubmit={handleAdd}
               onCancel={() => setShowAdd(false)}
+              continuous
+              cancelLabel="完成"
             />
           </div>
         </div>

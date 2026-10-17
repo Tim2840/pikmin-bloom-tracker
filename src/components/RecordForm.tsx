@@ -27,11 +27,17 @@ interface RecordFormProps {
   people: Person[]
   initial?: RecordItem
   submitLabel: string
-  onSubmit: (values: RecordFormValues) => void
+  /** 回傳 false 代表儲存失敗（連續新增模式下不重設表單） */
+  onSubmit: (values: RecordFormValues) => void | boolean | Promise<void | boolean>
   onCancel: () => void
+  /** 連續新增模式：儲存後留在同一位好友，只清空備註，方便一次記多筆 */
+  continuous?: boolean
+  cancelLabel?: string
 }
 
-export default function RecordForm({ people, initial, submitLabel, onSubmit, onCancel }: RecordFormProps) {
+export default function RecordForm({
+  people, initial, submitLabel, onSubmit, onCancel, continuous = false, cancelLabel = '取消',
+}: RecordFormProps) {
   const [personId, setPersonId] = useState(initial?.personId ?? '')
   const [itemType, setItemType] = useState<ItemType>(initial?.itemType ?? 'postcard')
   const [actionType, setActionType] = useState<ActionType>(
@@ -40,6 +46,8 @@ export default function RecordForm({ people, initial, submitLabel, onSubmit, onC
   const [date, setDate] = useState(initial?.date ?? getOffsetDate(0))
   const [note, setNote] = useState(initial?.note ?? '')
   const [errorText, setErrorText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [savedCount, setSavedCount] = useState(0)
 
   // 切換品項時保留方向（往外仍往外），僅把舊的 helped 正規化為 sent
   const handleItemChange = (value: ItemType) => {
@@ -47,27 +55,43 @@ export default function RecordForm({ people, initial, submitLabel, onSubmit, onC
     if (actionType === 'helped') setActionType('sent')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
     if (!personId) {
       setErrorText('請選擇一位好友！')
       return
     }
     const person = people.find(p => p.id === personId)
-    onSubmit({
-      personId,
-      personNameSnapshot: person?.name ?? initial?.personNameSnapshot ?? '',
-      date,
-      itemType,
-      actionType,
-      note: note.trim() || undefined,
-    })
+    setSubmitting(true)
+    try {
+      const result = await onSubmit({
+        personId,
+        personNameSnapshot: person?.name ?? initial?.personNameSnapshot ?? '',
+        date,
+        itemType,
+        actionType,
+        note: note.trim() || undefined,
+      })
+      // 連續新增：保留好友／品項／方向／日期，只清掉備註
+      if (continuous && result !== false) {
+        setNote('')
+        setSavedCount(c => c + 1)
+      }
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {errorText && (
         <p className="text-sm font-bold text-rose-600 bg-rose-50 rounded-xl px-3 py-2">{errorText}</p>
+      )}
+      {continuous && savedCount > 0 && (
+        <p className="text-base font-bold text-lime-700 bg-lime-50 rounded-xl px-3 py-2">
+          ✅ 已連續記錄 {savedCount} 筆，可以繼續記，記完按「完成」
+        </p>
       )}
 
       {/* 人名快捷按鈕 */}
@@ -203,11 +227,12 @@ export default function RecordForm({ people, initial, submitLabel, onSubmit, onC
           onClick={onCancel}
           className="flex-1 h-12 rounded-xl bg-stone-100 text-stone-600 font-bold hover:bg-stone-200 transition-colors"
         >
-          取消
+          {cancelLabel}
         </button>
         <button
           type="submit"
-          className="flex-1 h-12 rounded-xl bg-sky-600 text-white font-extrabold hover:bg-sky-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+          disabled={submitting}
+          className="flex-1 h-12 rounded-xl bg-sky-600 text-white font-extrabold hover:bg-sky-700 disabled:opacity-60 transition-colors shadow-sm flex items-center justify-center gap-2"
         >
           <Check className="w-5 h-5" />
           {submitLabel}
