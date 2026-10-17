@@ -45,6 +45,10 @@
 - 好友上限 20 → 100（`MAX_PEOPLE`，在 `usePeopleStore.ts`）。
 - 取捨：A 裝置刪除、B 裝置本機仍有時，B 重新整理會把它補傳回來（寧可多不可少）。
 
+## 互動紀錄：連續新增
+- 「新增紀錄」儲存後**不關視窗**，停在同一位好友／品項／方向／日期，只清空備註；按「完成」才關閉（`RecordForm` 的 `continuous` 模式，編輯模式不受影響）。
+- 儲存失敗時不重設表單；儲存中按鈕 disabled 防連點重複新增。
+
 ## 待驗收 / 已知事項
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
