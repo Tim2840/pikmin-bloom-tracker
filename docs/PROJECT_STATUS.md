@@ -48,6 +48,8 @@
 ## 互動紀錄：連續新增
 - 「新增紀錄」儲存後**不關視窗**，停在同一位好友／品項／方向／日期，只清空備註；按「完成」才關閉（`RecordForm` 的 `continuous` 模式，編輯模式不受影響）。
 - 儲存失敗時不重設表單；儲存中按鈕 disabled 防連點重複新增。
+- **編輯紀錄**只顯示該筆的好友（不列全部名冊）；僅當好友已被刪除時才退回選單。
+- **日期欄位**改為「年／月／日」三個下拉（`src/components/DateSelect.tsx`），取代原生 `<input type="date">`——手機上選完年月選單會自動關閉、日期得重開再選。不可選未來日期，改年月時日數自動夾回合法範圍（3/31 → 2 月 = 2/28）。
 
 ## 待驗收 / 已知事項
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
