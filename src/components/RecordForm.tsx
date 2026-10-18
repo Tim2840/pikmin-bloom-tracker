@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Check } from 'lucide-react'
 import { ItemType, ActionType, Person, RecordItem, RecordFormValues } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel } from '../lib/recordLabels'
+import DateSelect from './DateSelect'
 
 const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
   { value: 'postcard', ...ITEM_META.postcard },
@@ -46,6 +47,8 @@ export default function RecordForm({
   const [date, setDate] = useState(initial?.date ?? getOffsetDate(0))
   const [note, setNote] = useState(initial?.note ?? '')
   const [errorText, setErrorText] = useState('')
+  // 編輯既有紀錄且該好友還在名冊中：只顯示他，不需重選（好友已被刪除時才退回選單）
+  const lockedPerson = initial ? people.find(p => p.id === initial.personId) : undefined
   const [submitting, setSubmitting] = useState(false)
   const [savedCount, setSavedCount] = useState(0)
 
@@ -94,8 +97,28 @@ export default function RecordForm({
         </p>
       )}
 
-      {/* 人名快捷按鈕 */}
+      {/* 人名：編輯時固定顯示該好友（不列出全部好友）；新增時才列出供選擇 */}
       <div>
+        {lockedPerson ? (
+          <>
+            <label className="block text-sm font-bold text-stone-600 mb-2">好友</label>
+            <div
+              className="inline-flex items-center gap-2 px-4 min-h-[48px] rounded-2xl border-2 font-bold text-base"
+              style={{
+                borderColor: lockedPerson.color || '#6B7280',
+                backgroundColor: `${lockedPerson.color || '#6B7280'}15`,
+                color: lockedPerson.color || '#6B7280',
+              }}
+            >
+              <span
+                className="w-5 h-5 rounded-full shrink-0"
+                style={{ backgroundColor: lockedPerson.color || '#6B7280' }}
+              />
+              {lockedPerson.name}
+            </div>
+          </>
+        ) : (
+        <>
         <label className="block text-sm font-bold text-stone-600 mb-2">
           選擇好友 <span className="text-rose-500">*</span>
         </label>
@@ -128,6 +151,8 @@ export default function RecordForm({
               )
             })}
           </div>
+        )}
+        </>
         )}
       </div>
 
@@ -197,13 +222,7 @@ export default function RecordForm({
             )
           })}
         </div>
-        <input
-          type="date"
-          value={date}
-          max={getOffsetDate(0)}
-          onChange={e => setDate(e.target.value)}
-          className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white text-base text-stone-800"
-        />
+        <DateSelect value={date} max={getOffsetDate(0)} onChange={setDate} />
       </div>
 
       {/* 備註 */}
