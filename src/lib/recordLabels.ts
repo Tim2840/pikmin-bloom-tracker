@@ -47,3 +47,9 @@ export const ACTION_STYLE: Record<string, string> = {
   received: 'bg-lime-50 text-lime-700',
   helped: 'bg-violet-50 text-violet-700',
 }
+
+// 統計頁用的方向標籤（往外 / 往內）
+export const STAT_LABELS: Record<ItemType, { sent: string; received: string }> = {
+  postcard: { sent: '寄出', received: '收到' },
+  mushroom: { sent: '我邀他', received: '他邀我' },
+}

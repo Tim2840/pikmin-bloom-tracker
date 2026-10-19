@@ -51,6 +51,20 @@
 - **編輯紀錄**只顯示該筆的好友（不列全部名冊）；僅當好友已被刪除時才退回選單。
 - **日期欄位**改為「年／月／日」三個下拉（`src/components/DateSelect.tsx`），取代原生 `<input type="date">`——手機上選完年月選單會自動關閉、日期得重開再選。不可選未來日期，改年月時日數自動夾回合法範圍（3/31 → 2 月 = 2/28）。
 
+## 統計頁：雙向明細
+- 摘要卡拆為：寄出明信片／收到明信片／我邀請他打蘑菇／他邀請我打蘑菇（原本「寄出明信片」「打蘑菇」把兩個方向混算）。
+- 「每位好友明細」每人顯示四個數字（📮寄出／收到、🍄我邀他／他邀我）。
+- 計數邏輯在 `recordService.countByDirection`（含測試）；文案在 `recordLabels.STAT_LABELS`；舊資料 `helped` 算往外。
+
+## 協作分工（主管制，省 token）
+- 主 session 兼「主管」：統整、驗證、向使用者報告，並負責最後合併與確認部署。
+- 預設**不另開 session**：單一頁面／小型修改由主 session 直接做（讀檔 → 改 → tsc/test/build → 實測 → 合併）。
+- 只有符合「跨多個獨立面向」或「需長時間獨立驗證」才開子 session，且每個子 session 角色固定：
+  1. **功能實作**：UI／頁面／store 改動。
+  2. **驗證 QA**：長輩友善規則（48px、字級、確認 Modal）檢查＋手機視窗實測＋回歸測試。
+  3. **後端同步**：Supabase migration、RLS、同步合併邏輯（沙箱連不到 Supabase，只能做程式面）。
+- 子 session 一律在各自分支開發、只回報結果摘要；合併到 `main` 與部署確認由主管做。
+
 ## 待驗收 / 已知事項
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。

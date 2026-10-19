@@ -44,3 +44,24 @@ export function filterRecords(records: RecordItem[], filters: RecordFilters, lim
   const hasFilter = filters.personId !== 'all' || filters.itemType !== 'all'
   return hasFilter ? result : result.slice(0, limit)
 }
+
+export interface DirectionCounts {
+  postcard: { sent: number; received: number }
+  mushroom: { sent: number; received: number }
+}
+
+export const emptyDirectionCounts = (): DirectionCounts => ({
+  postcard: { sent: 0, received: 0 },
+  mushroom: { sent: 0, received: 0 },
+})
+
+// 依品項與方向計數；舊資料的 helped 視同 sent（往外）
+export function addToDirectionCounts(counts: DirectionCounts, r: RecordItem): void {
+  counts[r.itemType][r.actionType === 'received' ? 'received' : 'sent']++
+}
+
+export function countByDirection(records: RecordItem[]): DirectionCounts {
+  const counts = emptyDirectionCounts()
+  for (const r of records) addToDirectionCounts(counts, r)
+  return counts
+}
