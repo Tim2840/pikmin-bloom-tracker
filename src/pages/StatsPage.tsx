@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox, HelpCircle } from 'lucide-react'
+import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox, HelpCircle, Mail, UserPlus } from 'lucide-react'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { RecordItem } from '../types'
+import { STAT_LABELS } from '../lib/recordLabels'
+import { DirectionCounts, addToDirectionCounts, countByDirection, emptyDirectionCounts } from '../services/recordService'
 import { RANGE_OPTIONS, RangeKey, isInRange, formatDate } from '../lib/dateUtils'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
@@ -12,8 +14,7 @@ interface PersonStat {
   id: string | null
   name: string
   color: string
-  postcardSent: number   // 寄出明信片
-  mushroomInvited: number // 邀 / 協助打蘑菇
+  counts: DirectionCounts // 明信片 / 蘑菇 各自的往外、往內次數
   total: number
   lastDate: string | null
 }
@@ -61,15 +62,13 @@ export default function StatsPage() {
           id: r.personId,
           name: resolveName(r),
           color: resolveColor(r),
-          postcardSent: 0,
-          mushroomInvited: 0,
+          counts: emptyDirectionCounts(),
           total: 0,
           lastDate: null,
         }
         map.set(key, s)
       }
-      if (r.itemType === 'postcard' && r.actionType === 'sent') s.postcardSent++
-      if (r.itemType === 'mushroom' && (r.actionType === 'sent' || r.actionType === 'helped')) s.mushroomInvited++
+      addToDirectionCounts(s.counts, r)
       s.total++
       if (!s.lastDate || r.date > s.lastDate) s.lastDate = r.date
     }
@@ -78,14 +77,15 @@ export default function StatsPage() {
 
   // 摘要卡數字
   const totalInteractions = ranged.length
-  const postcardTotal = ranged.filter(r => r.itemType === 'postcard').length
-  const mushroomTotal = ranged.filter(r => r.itemType === 'mushroom').length
+  const dirTotals = useMemo(() => countByDirection(ranged), [ranged])
 
   const summaryCards = [
     { icon: Users, label: '好友總數', value: people.length, suffix: '位', bg: 'bg-lime-50', text: 'text-lime-700', ic: 'text-lime-500' },
     { icon: Heart, label: '互動次數', value: totalInteractions, suffix: '次', bg: 'bg-sky-50', text: 'text-sky-700', ic: 'text-sky-500' },
-    { icon: TrendingUp, label: '寄出明信片', value: postcardTotal, suffix: '張', bg: 'bg-amber-50', text: 'text-amber-700', ic: 'text-amber-500' },
-    { icon: BarChart3, label: '打蘑菇', value: mushroomTotal, suffix: '次', bg: 'bg-violet-50', text: 'text-violet-700', ic: 'text-violet-500' },
+    { icon: TrendingUp, label: '寄出明信片', value: dirTotals.postcard.sent, suffix: '張', bg: 'bg-amber-50', text: 'text-amber-700', ic: 'text-amber-500' },
+    { icon: Mail, label: '收到明信片', value: dirTotals.postcard.received, suffix: '張', bg: 'bg-orange-50', text: 'text-orange-700', ic: 'text-orange-500' },
+    { icon: BarChart3, label: '我邀請他打蘑菇', value: dirTotals.mushroom.sent, suffix: '次', bg: 'bg-violet-50', text: 'text-violet-700', ic: 'text-violet-500' },
+    { icon: UserPlus, label: '他邀請我打蘑菇', value: dirTotals.mushroom.received, suffix: '次', bg: 'bg-fuchsia-50', text: 'text-fuchsia-700', ic: 'text-fuchsia-500' },
   ]
 
   const top5 = personStats.slice(0, 5)
@@ -122,7 +122,7 @@ export default function StatsPage() {
       </div>
 
       {/* 摘要統計卡：手機兩欄，桌面四欄 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {summaryCards.map(card => {
           const Icon = card.icon
           return (
@@ -130,7 +130,7 @@ export default function StatsPage() {
               <div className={`w-10 h-10 ${card.bg} rounded-xl flex items-center justify-center mb-3`}>
                 <Icon className={`w-5 h-5 ${card.ic}`} />
               </div>
-              <p className="text-stone-500 text-xs font-bold mb-1">{card.label}</p>
+              <p className="text-stone-500 text-base font-bold mb-1">{card.label}</p>
               <div className="flex items-baseline gap-1">
                 <span className={`text-3xl font-black tabular-nums ${card.text}`}>{card.value}</span>
                 <span className="text-stone-400 text-sm font-bold">{card.suffix}</span>
@@ -187,17 +187,30 @@ export default function StatsPage() {
             </h2>
             <div className="space-y-3">
               {personStats.map(s => (
-                <div key={s.id ?? s.name} className="flex items-center gap-3 py-1">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-stone-800 truncate">{s.name}</p>
-                    <p className="text-xs text-stone-400">
-                      最近互動：{s.lastDate ? formatDate(s.lastDate) : '—'}
-                    </p>
+                <div key={s.id ?? s.name} className="py-1">
+                  <div className="flex items-center gap-3">
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-stone-800 truncate">{s.name}</p>
+                      <p className="text-sm text-stone-400">
+                        最近互動：{s.lastDate ? formatDate(s.lastDate) : '—'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2 shrink-0 text-xs font-bold">
-                    <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 tabular-nums">📮 {s.postcardSent}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 tabular-nums">🍄 {s.mushroomInvited}</span>
+                  {/* 往外 / 往內分開顯示：我寄出、對方寄來；我邀請他、他邀請我 */}
+                  <div className="flex flex-wrap gap-2 mt-2 ml-6 text-base font-bold">
+                    <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 tabular-nums">
+                      📮 {STAT_LABELS.postcard.sent} {s.counts.postcard.sent}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 tabular-nums">
+                      📮 {STAT_LABELS.postcard.received} {s.counts.postcard.received}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-violet-50 text-violet-700 tabular-nums">
+                      🍄 {STAT_LABELS.mushroom.sent} {s.counts.mushroom.sent}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 tabular-nums">
+                      🍄 {STAT_LABELS.mushroom.received} {s.counts.mushroom.received}
+                    </span>
                   </div>
                 </div>
               ))}
