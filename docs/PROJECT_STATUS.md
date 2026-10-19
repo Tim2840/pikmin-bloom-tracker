@@ -65,6 +65,11 @@
   3. **後端同步**：Supabase migration、RLS、同步合併邏輯（沙箱連不到 Supabase，只能做程式面）。
 - 子 session 一律在各自分支開發、只回報結果摘要；合併到 `main` 與部署確認由主管做。
 
+## 發佈規則（使用者長期授權）
+- 使用者已授權：**修好（bug 修正、使用者要求的小功能）後，驗證通過就直接開 PR、squash 合併到 `main` 並確認 Deploy 成功，再向使用者回報**，不必每次先問。
+- 前提：`npx tsc --noEmit`、`npm test`、`npm run build` 都綠燈；有畫面改動要先實測。
+- 仍須先問的情況：改 `package.json` 相依、動 auth／資料遷移／Supabase 結構、刪除資料或其他不易回復的動作。
+
 ## 待驗收 / 已知事項
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
