@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut, FileDown } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { linkGoogle, signOut } from '../lib/auth'
 import GoogleG from '../components/GoogleG'
+import { usePeopleStore } from '../stores/usePeopleStore'
+import { useRecordsStore } from '../stores/useRecordsStore'
+import { buildPeopleCsv, buildRecordsCsv, downloadCsv } from '../lib/exportData'
+import { todayStr } from '../lib/dateUtils'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
 
 const PRESETS = [
@@ -21,6 +25,26 @@ export default function SettingsPage() {
   const [authError, setAuthError] = useState('')
   const [confirmLogout, setConfirmLogout] = useState(false)
   const dbEnabled = isSupabaseConfigured()
+  const [exportMsg, setExportMsg] = useState('')
+
+  // 匯出前先同步一次（雲端與本機合併後再輸出），讀 store 最新狀態
+  const handleExport = async (kind: 'people' | 'records') => {
+    setExportMsg('')
+    await Promise.all([usePeopleStore.getState().fetchPeople(), useRecordsStore.getState().fetchRecords()])
+    const { people } = usePeopleStore.getState()
+    const { records } = useRecordsStore.getState()
+    // 檔名用英文：部分瀏覽器會吃掉非 ASCII 檔名
+    const date = todayStr()
+    if (kind === 'people') {
+      const filename = `PikLog_people_${date}.csv`
+      downloadCsv(filename, buildPeopleCsv(people))
+      setExportMsg(`已匯出 ${people.length} 位好友（檔名：${filename}）`)
+    } else {
+      const filename = `PikLog_records_${date}.csv`
+      downloadCsv(filename, buildRecordsCsv(records, people))
+      setExportMsg(`已匯出 ${records.length} 筆紀錄（檔名：${filename}）`)
+    }
+  }
 
   // 追蹤 PWA 可安裝狀態
   const [installable, setInstallable] = useState(canInstall())
@@ -193,6 +217,31 @@ export default function SettingsPage() {
           )}
         </section>
       )}
+
+      {/* 匯出資料 */}
+      <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">
+        <h2 className="text-lg font-extrabold text-stone-800 mb-1 flex items-center gap-2">
+          <FileDown className="w-5 h-5 text-lime-600" /> 匯出資料
+        </h2>
+        <p className="text-stone-500 text-base mb-4">
+          把好友名單和互動紀錄存成檔案（CSV），可以用 Excel 或 Google 試算表打開，也能留一份自己保存。
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => handleExport('people')}
+            className="accessible-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-lime-600 hover:bg-lime-700 text-white font-extrabold text-lg shadow-md transition-all active:scale-95"
+          >
+            <FileDown className="w-5 h-5" /> 匯出好友名單
+          </button>
+          <button
+            onClick={() => handleExport('records')}
+            className="accessible-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-lg shadow-md transition-all active:scale-95"
+          >
+            <FileDown className="w-5 h-5" /> 匯出互動紀錄
+          </button>
+        </div>
+        {exportMsg && <p className="mt-3 text-base font-bold text-lime-700">{exportMsg}</p>}
+      </section>
 
       {/* 加入主畫面 */}
       <section className="glass-card rounded-3xl p-5 md:p-6 max-w-xl">
