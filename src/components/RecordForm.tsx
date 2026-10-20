@@ -97,7 +97,7 @@ export default function RecordForm({
         </p>
       )}
 
-      {/* 人名：編輯時固定顯示該好友（不列出全部好友）；新增時才列出供選擇 */}
+      {/* 人名：編輯時固定顯示該好友（不列出全部好友）；新增時用下拉選單選擇（好友多時不必滑很久） */}
       <div>
         {lockedPerson ? (
           <>
@@ -127,30 +127,18 @@ export default function RecordForm({
             尚無好友，請先到「人物管理」新增。
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {people.map(p => {
-              const selected = personId === p.id
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => { setPersonId(p.id); setErrorText('') }}
-                  className="accessible-target flex items-center gap-2 px-4 rounded-2xl border-2 font-bold text-base transition-all"
-                  style={{
-                    borderColor: selected ? (p.color || '#6B7280') : '#E5E7EB',
-                    backgroundColor: selected ? `${p.color || '#6B7280'}15` : '#FFFFFF',
-                    color: selected ? (p.color || '#6B7280') : '#57534e',
-                  }}
-                >
-                  <span
-                    className="w-5 h-5 rounded-full shrink-0"
-                    style={{ backgroundColor: p.color || '#6B7280' }}
-                  />
-                  {p.name}
-                </button>
-              )
-            })}
-          </div>
+          <select
+            value={personId}
+            onChange={e => { setPersonId(e.target.value); setErrorText('') }}
+            className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white text-base text-stone-800"
+          >
+            <option value="">請選擇好友</option>
+            {people.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name}{p.nickname ? `（${p.nickname}）` : ''}
+              </option>
+            ))}
+          </select>
         )}
         </>
         )}
