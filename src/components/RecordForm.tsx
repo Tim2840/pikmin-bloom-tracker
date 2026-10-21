@@ -97,7 +97,7 @@ export default function RecordForm({
         </p>
       )}
 
-      {/* 人名：編輯時固定顯示該好友（不列出全部好友）；新增時用下拉選單選擇（好友多時不必滑很久） */}
+      {/* 人名：編輯時固定顯示該好友（不列出全部好友）；新增時用下拉選單選擇（只顯示名字，不加暱稱括號） */}
       <div>
         {lockedPerson ? (
           <>
@@ -134,9 +134,7 @@ export default function RecordForm({
           >
             <option value="">請選擇好友</option>
             {people.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.name}{p.nickname ? `（${p.nickname}）` : ''}
-              </option>
+              <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
         )}
