@@ -114,7 +114,7 @@ export default function StatsPage() {
         <h1 className="text-2xl md:text-3xl font-black text-stone-800 tracking-tight flex items-center gap-2">
           📊 統計分析
         </h1>
-        <p className="text-stone-500 text-sm md:text-base mt-0.5">互動頻率與好友關係總覽</p>
+        <p className="text-stone-500 text-sm md:text-base mt-0.5">互動頻率與好友關係</p>
       </div>
 
       {/* 時間範圍切換 */}
@@ -240,7 +240,7 @@ export default function StatsPage() {
             <BellRing className="w-5 h-5 text-sky-500" />
             很久沒互動的好友
           </h2>
-          <p className="text-base text-stone-500 mb-4">超過 {INACTIVE_DAYS} 天沒有任何往來（不受上方時間範圍影響）</p>
+          <p className="text-base text-stone-500 mb-4">超過 {INACTIVE_DAYS} 天沒往來</p>
           {inactive.length === 0 ? (
             <p className="text-base font-bold text-lime-700 bg-lime-50 rounded-xl px-4 py-3">
               🎉 每位好友 {INACTIVE_DAYS} 天內都有互動，太棒了！

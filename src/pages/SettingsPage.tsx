@@ -38,11 +38,11 @@ export default function SettingsPage() {
     if (kind === 'people') {
       const filename = `PikLog_people_${date}.csv`
       downloadCsv(filename, buildPeopleCsv(people))
-      setExportMsg(`已匯出 ${people.length} 位好友（檔名：${filename}）`)
+      setExportMsg(`已匯出 ${people.length} 位好友`)
     } else {
       const filename = `PikLog_records_${date}.csv`
       downloadCsv(filename, buildRecordsCsv(records, people))
-      setExportMsg(`已匯出 ${records.length} 筆紀錄（檔名：${filename}）`)
+      setExportMsg(`已匯出 ${records.length} 筆紀錄`)
     }
   }
 
@@ -224,7 +224,7 @@ export default function SettingsPage() {
           <FileDown className="w-5 h-5 text-lime-600" /> 匯出資料
         </h2>
         <p className="text-stone-500 text-base mb-4">
-          把好友名單和互動紀錄存成檔案（CSV），可以用 Excel 或 Google 試算表打開，也能留一份自己保存。
+          存成可用 Excel 或試算表開啟的檔案
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <button
