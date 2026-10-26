@@ -5,7 +5,7 @@ import { getSessionUserId } from '../lib/auth'
 import { colorForCountry } from '../lib/countries'
 import { mergeWithLocal } from '../lib/syncMerge'
 
-export const MAX_PEOPLE = 100
+export const MAX_PEOPLE = 450 // 遊戲好友上限為 450 位
 
 interface PeopleState {
   people: Person[]

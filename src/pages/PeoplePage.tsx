@@ -5,8 +5,9 @@ import { isSupabaseConfigured } from '../lib/supabase'
 import {
   UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
   Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield,
-  ChevronUp, ChevronDown, Zap, HelpCircle,
+  ChevronUp, ChevronDown, Zap, HelpCircle, Search, ChevronRight,
 } from 'lucide-react'
+import { filterPeople } from '../services/peopleService'
 import { COUNTRY_CODES, countryLabel, countryFlag, countryName } from '../lib/countries'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
@@ -65,6 +66,7 @@ export default function PeoplePage() {
   const [editIcon, setEditIcon] = useState(ICON_PRESETS[0].value)
 
   const [deletingPersonId, setDeletingPersonId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
 
   // 提示訊息
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
@@ -147,6 +149,8 @@ export default function PeoplePage() {
   }
 
   const isDBOnline = isSupabaseConfigured()
+  const visiblePeople = filterPeople(people, search)
+  const isSearching = search.trim() !== ''
 
   const tutSteps = TUTORIAL_STEPS.people
   const { isOpen: tutOpen, currentStep: tutStep, isComplete: tutDone, startTutorial, next: tutNext, skip: tutSkip, closeComplete: tutClose } = useTutorial('people', tutSteps.length)
@@ -296,8 +300,31 @@ export default function PeoplePage() {
         {/* 人物名冊清單 (右側欄，佔 7/12) */}
         <section className="md:col-span-7 mt-8 md:mt-0" data-tutorial="people-list">
           <h2 className="text-lg font-extrabold text-stone-850 mb-4">
-            👥 好友名冊 ({people.length} 人)
+            👥 好友名冊 ({isSearching ? `符合 ${visiblePeople.length} / 共 ${people.length}` : people.length} 人)
           </h2>
+
+          {/* 搜尋：好友多時快速找人 */}
+          {people.length >= 6 && (
+            <div className="relative mb-4">
+              <Search className="w-5 h-5 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="搜尋好友姓名、暱稱或國家"
+                className="w-full h-12 pl-12 pr-12 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+              />
+              {isSearching && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="accessible-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-stone-400 hover:text-stone-700"
+                  aria-label="清除搜尋"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          )}
 
           {loading && people.length === 0 ? (
             <div className="space-y-3">
@@ -311,9 +338,14 @@ export default function PeoplePage() {
               <p className="font-bold text-stone-700">目前名冊空空的喔！</p>
               <p className="text-xs text-stone-400 mt-1">請使用左側表單新增第一位好友吧！</p>
             </div>
+          ) : visiblePeople.length === 0 ? (
+            <div className="glass-card rounded-3xl p-8 text-center text-stone-500">
+              <p className="font-bold text-stone-700 text-lg">找不到「{search.trim()}」</p>
+              <p className="text-base mt-1">換個關鍵字，或清除搜尋看看。</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3">
-              {people.map((person, idx) => {
+              {visiblePeople.map((person, idx) => {
                 const IconComp = getIconComponent(person.icon)
                 return (
                   <div
@@ -324,7 +356,7 @@ export default function PeoplePage() {
                     <div className="flex flex-col gap-1 shrink-0">
                       <button
                         onClick={() => reorderPerson(person.id, 'up')}
-                        disabled={idx === 0}
+                        disabled={isSearching || idx === 0}
                         className="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="往上移"
                       >
@@ -332,7 +364,7 @@ export default function PeoplePage() {
                       </button>
                       <button
                         onClick={() => reorderPerson(person.id, 'down')}
-                        disabled={idx === people.length - 1}
+                        disabled={isSearching || idx === people.length - 1}
                         className="w-8 h-8 flex items-center justify-center rounded-lg bg-stone-100 text-stone-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         title="往下移"
                       >
@@ -340,29 +372,38 @@ export default function PeoplePage() {
                       </button>
                     </div>
 
-                    {/* 大彩色頭像 */}
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
-                      style={{ backgroundColor: person.color || '#6B7280' }}
+                    {/* 點頭像 / 姓名 → 查看這位好友的完整往來 */}
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/people/${person.id}`)}
+                      className="accessible-target flex items-center gap-3 min-w-0 flex-1 text-left"
+                      aria-label={`查看 ${person.name} 的往來紀錄`}
                     >
-                      <IconComp className="w-6 h-6" />
-                    </div>
+                      {/* 大彩色頭像 */}
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black shadow-sm shrink-0"
+                        style={{ backgroundColor: person.color || '#6B7280' }}
+                      >
+                        <IconComp className="w-6 h-6" />
+                      </div>
 
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
-                        {person.name}
-                      </h3>
-                      {person.country && (
-                        <span className="text-sm font-bold text-stone-600 block mt-0.5 truncate">
-                          {countryLabel(person.country)}
-                        </span>
-                      )}
-                      {person.nickname && (
-                        <span className="text-xs font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
-                          暱稱：{person.nickname}
-                        </span>
-                      )}
-                    </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-black text-lg text-stone-800 leading-tight truncate">
+                          {person.name}
+                        </h3>
+                        {person.country && (
+                          <span className="text-base font-bold text-stone-600 block mt-0.5 truncate">
+                            {countryLabel(person.country)}
+                          </span>
+                        )}
+                        {person.nickname && (
+                          <span className="text-base font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
+                            暱稱：{person.nickname}
+                          </span>
+                        )}
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-stone-300 shrink-0" />
+                    </button>
 
                     {/* 操作按鈕 */}
                     <div className="flex space-x-2 shrink-0">
