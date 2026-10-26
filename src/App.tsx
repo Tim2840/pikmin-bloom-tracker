@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import PeoplePage from './pages/PeoplePage'
 import QuickActionsPage from './pages/QuickActionsPage'
+import FriendDetailPage from './pages/FriendDetailPage'
 import RecordsPage from './pages/RecordsPage'
 import StatsPage from './pages/StatsPage'
 import CalendarPage from './pages/CalendarPage'
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/people/quick-actions" element={<QuickActionsPage />} />
+          <Route path="/people/:id" element={<FriendDetailPage />} />
           <Route path="/records" element={<RecordsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/stats" element={<StatsPage />} />

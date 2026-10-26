@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox, HelpCircle, Mail, UserPlus } from 'lucide-react'
+import { BarChart3, TrendingUp, Users, Heart, Trophy, Inbox, HelpCircle, Mail, UserPlus, BellRing } from 'lucide-react'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
+import { useNavigate } from 'react-router-dom'
 import { RecordItem } from '../types'
+import { findInactiveFriends } from '../services/peopleService'
 import { STAT_LABELS } from '../lib/recordLabels'
 import { DirectionCounts, addToDirectionCounts, countByDirection, emptyDirectionCounts } from '../services/recordService'
-import { RANGE_OPTIONS, RangeKey, isInRange, formatDate } from '../lib/dateUtils'
+import { RANGE_OPTIONS, RangeKey, isInRange, formatDate, todayStr } from '../lib/dateUtils'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
@@ -22,7 +24,9 @@ interface PersonStat {
 export default function StatsPage() {
   const { records, fetchRecords } = useRecordsStore()
   const { people, fetchPeople } = usePeopleStore()
+  const navigate = useNavigate()
   const [range, setRange] = useState<RangeKey>('month')
+  const [showAllInactive, setShowAllInactive] = useState(false)
 
   useEffect(() => {
     fetchRecords()
@@ -89,6 +93,15 @@ export default function StatsPage() {
   ]
 
   const top5 = personStats.slice(0, 5)
+
+  // 很久沒互動的好友：不受上方時間範圍影響，固定看全部紀錄、30 天為門檻
+  const INACTIVE_DAYS = 30
+  const INACTIVE_PREVIEW = 8
+  const inactive = useMemo(
+    () => findInactiveFriends(people, records, todayStr(), INACTIVE_DAYS),
+    [people, records],
+  )
+  const inactiveShown = showAllInactive ? inactive : inactive.slice(0, INACTIVE_PREVIEW)
   const isEmpty = totalInteractions === 0
 
   const tutSteps = TUTORIAL_STEPS.stats
@@ -219,6 +232,49 @@ export default function StatsPage() {
         </div>
       )}
       </div>{/* end stats-list */}
+
+      {/* 很久沒互動的好友 */}
+      {people.length > 0 && (
+        <div className="glass-card rounded-3xl p-6 mt-4">
+          <h2 className="font-bold text-stone-700 mb-1 flex items-center gap-2 text-lg">
+            <BellRing className="w-5 h-5 text-sky-500" />
+            很久沒互動的好友
+          </h2>
+          <p className="text-base text-stone-500 mb-4">超過 {INACTIVE_DAYS} 天沒有任何往來（不受上方時間範圍影響）</p>
+          {inactive.length === 0 ? (
+            <p className="text-base font-bold text-lime-700 bg-lime-50 rounded-xl px-4 py-3">
+              🎉 每位好友 {INACTIVE_DAYS} 天內都有互動，太棒了！
+            </p>
+          ) : (
+            <>
+              <ul className="space-y-1">
+                {inactiveShown.map(f => (
+                  <li key={f.person.id}>
+                    <button
+                      onClick={() => navigate(`/people/${f.person.id}`)}
+                      className="accessible-target w-full flex items-center gap-3 rounded-xl px-2 text-left hover:bg-stone-50 transition-colors"
+                    >
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: f.person.color || '#9CA3AF' }} />
+                      <span className="font-bold text-stone-800 text-base truncate flex-1">{f.person.name}</span>
+                      <span className="text-base font-bold text-sky-700 shrink-0 tabular-nums">
+                        {f.daysSince === null ? '還沒有紀錄' : `${f.daysSince} 天`}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {inactive.length > INACTIVE_PREVIEW && (
+                <button
+                  onClick={() => setShowAllInactive(v => !v)}
+                  className="accessible-target mt-3 w-full h-12 rounded-xl bg-stone-100 text-stone-600 font-bold text-base hover:bg-stone-200 transition-colors"
+                >
+                  {showAllInactive ? '收合' : `顯示全部 ${inactive.length} 位`}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* 說明按鈕 */}
       <button

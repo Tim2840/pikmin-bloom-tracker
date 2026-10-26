@@ -57,6 +57,18 @@
 - 檔名刻意用英文（`PikLog_people_日期.csv`、`PikLog_records_日期.csv`）：部分瀏覽器會吃掉非 ASCII 檔名。
 - 匯出前會先 `fetchPeople/fetchRecords` 同步一次。目前沒有「匯入」。
 
+## 好友往來 / 搜尋 / 久未互動 / 測試閘門
+- **好友上限 450**（`MAX_PEOPLE`，對齊遊戲好友上限；原 100）。
+- **好友往來頁** `/people/:id`（`FriendDetailPage`）：人物管理點頭像／姓名進入；顯示四個累計數字、最近互動（幾天前）、完整時間軸（30 筆一頁、可「顯示更多」）。`/people/quick-actions` 仍為獨立靜態路由。
+- **好友搜尋**：人物管理好友 ≥ 6 位時出現搜尋框（姓名／暱稱／國家名）；搜尋中停用排序鈕（排序以全名單為準）。
+- **很久沒互動**：統計頁底部，門檻 30 天、不受上方時間範圍影響；從沒紀錄的好友排最後。點名字進往來頁。
+- 純邏輯在 `src/services/peopleService.ts`（`filterPeople`、`findInactiveFriends`、`recordsOfPerson`），皆有單元測試。
+- **自動測試閘門**：`deploy.yml` 的 build job 在打包前跑 `npm test`；測試失敗 → build 失敗 → 不部署。**CI 紅燈先看是不是測試掛了。**
+- 目前測試皆為純函式單元測試（無 jsdom / 元件測試；要加需新增相依，須先問使用者）。
+
+## 後續想法（待使用者決定）
+- 首頁「今天還沒寄給誰」清單；快捷鈕誤點「復原」與同日重複寄出提醒；匯入 CSV；字級修正（仍有數處 `text-xs`，低於 16px 規則）。
+
 ## 統計頁：雙向明細
 - 摘要卡拆為：寄出明信片／收到明信片／我邀請他打蘑菇／他邀請我打蘑菇（原本「寄出明信片」「打蘑菇」把兩個方向混算）。
 - 「每位好友明細」每人顯示四個數字（📮寄出／收到、🍄我邀他／他邀我）。
@@ -81,7 +93,7 @@
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
 - ℹ️ npm audit 5 個漏洞**全為 dev 相依**（`npm audit --omit=dev` = 0），不影響線上。
 - ℹ️ PWA 蘑菇圖示需「刪舊捷徑 → 清快取 → 重新安裝」才會更新。
-- 💤 之前提過、未做：把測試綁進部署 CI、async session hook、Apple 登入（需 $99/年）。
+- 💤 之前提過、未做：async session hook、Apple 登入（需 $99/年）。（測試已綁進部署 CI。）
 
 ## 開發指令
 - 型別/打包：`npx tsc --noEmit`、`npm run build`（`tsc -b && vite build`）。
