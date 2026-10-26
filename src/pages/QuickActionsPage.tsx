@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
+import CountPill from '../components/CountPill'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, ActionType } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel, buildQuickActionLabel } from '../lib/recordLabels'
@@ -148,7 +149,7 @@ export default function QuickActionsPage() {
                   <option value="">請選擇好友</option>
                   {people.map(p => (
                     <option key={p.id} value={p.id}>
-                      {p.name}{p.nickname ? ` (${p.nickname})` : ''}
+                      {p.name}
                     </option>
                   ))}
                 </select>
@@ -200,8 +201,7 @@ export default function QuickActionsPage() {
               {/* 自訂標籤 */}
               <div>
                 <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                  按鈕標籤
-                  <span className="text-stone-400 text-xs font-normal ml-1">(留空自動產生)</span>
+                  按鈕名稱
                 </label>
                 <input
                   type="text"
@@ -248,7 +248,7 @@ export default function QuickActionsPage() {
         {/* 快捷動作列表 */}
         <section className="md:col-span-7 mt-8 md:mt-0">
           <h2 className="text-lg font-extrabold text-stone-800 mb-4">
-            ⚡ 我的快捷動作 ({quickActions.length} 個)
+            ⚡ 我的快捷動作 <CountPill>{quickActions.length} 個</CountPill>
           </h2>
 
           {loading && quickActions.length === 0 ? (

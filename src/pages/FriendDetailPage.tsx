@@ -9,6 +9,7 @@ import { formatDate, todayStr } from '../lib/dateUtils'
 import { countByDirection } from '../services/recordService'
 import { recordsOfPerson } from '../services/peopleService'
 import { differenceInCalendarDays, parseISO } from 'date-fns'
+import CountPill from '../components/CountPill'
 
 const PAGE_SIZE = 30
 
@@ -71,7 +72,7 @@ export default function FriendDetailPage() {
             <span className="truncate">{person.name}</span>
           </h1>
           <p className="text-stone-500 text-base mt-0.5 truncate">
-            {[countryLabel(person.country), person.nickname && `暱稱：${person.nickname}`].filter(Boolean).join(' · ') || '往來紀錄'}
+            {[countryLabel(person.country), person.nickname].filter(Boolean).join(' · ') || '往來紀錄'}
           </p>
         </div>
       </div>
@@ -90,13 +91,13 @@ export default function FriendDetailPage() {
         <Clock className="w-6 h-6 text-lime-600 shrink-0" />
         <p className="text-base font-bold text-stone-700">
           {lastDate
-            ? `最近互動：${formatDate(lastDate)}（${daysSince === 0 ? '今天' : `${daysSince} 天前`}）`
+            ? `最近互動 ${daysSince === 0 ? '今天' : `${daysSince} 天前`}`
             : '還沒有任何互動紀錄'}
         </p>
       </div>
 
       {/* 時間軸 */}
-      <h2 className="text-lg font-extrabold text-stone-800 mb-3">往來紀錄（共 {list.length} 筆）</h2>
+      <h2 className="text-lg font-extrabold text-stone-800 mb-3 flex items-center gap-2">往來紀錄 <CountPill>{list.length} 筆</CountPill></h2>
       {list.length === 0 ? (
         <div className="glass-card rounded-3xl p-10 text-center">
           <Inbox className="w-10 h-10 text-stone-300 mx-auto mb-2" />
@@ -124,7 +125,7 @@ export default function FriendDetailPage() {
               onClick={() => setShown(s => s + PAGE_SIZE)}
               className="accessible-target w-full h-12 rounded-xl bg-stone-100 text-stone-600 font-bold text-base hover:bg-stone-200 transition-colors"
             >
-              顯示更多（還有 {list.length - shown} 筆）
+              顯示更多
             </button>
           )}
         </div>

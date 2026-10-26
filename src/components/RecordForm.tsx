@@ -214,7 +214,7 @@ export default function RecordForm({
       {/* 備註 */}
       <div>
         <label className="block text-sm font-bold text-stone-600 mb-1.5">
-          備註 <span className="text-stone-400 text-xs font-normal">(選填)</span>
+          備註
         </label>
         <input
           type="text"

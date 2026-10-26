@@ -8,6 +8,7 @@ import {
   buildMonthGrid, WEEKDAY_LABELS, MONTH_LABEL, shiftMonth, todayStr, formatDateLong,
 } from '../lib/dateUtils'
 import TutorialOverlay from '../components/TutorialOverlay'
+import CountPill from '../components/CountPill'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
@@ -184,7 +185,7 @@ export default function CalendarPage() {
           <h3 className="font-black text-stone-800 mb-4 flex items-center gap-2">
             <CalendarDays className="w-5 h-5 text-lime-600" />
             {formatDateLong(selectedDate)}
-            <span className="text-stone-400 text-sm font-bold">（{selectedRecords.length} 筆）</span>
+            <CountPill>{selectedRecords.length} 筆</CountPill>
           </h3>
           {selectedRecords.length === 0 ? (
             <p className="text-stone-400 text-sm py-2">這天沒有任何互動紀錄。</p>

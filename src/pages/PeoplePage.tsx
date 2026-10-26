@@ -10,6 +10,7 @@ import {
 import { filterPeople } from '../services/peopleService'
 import { COUNTRY_CODES, countryLabel, countryFlag, countryName } from '../lib/countries'
 import TutorialOverlay from '../components/TutorialOverlay'
+import CountPill from '../components/CountPill'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
@@ -163,7 +164,7 @@ export default function PeoplePage() {
           <h1 className="text-2xl md:text-3xl font-black text-stone-850 tracking-tight flex items-center">
             👥 人物管理
           </h1>
-          <p className="text-stone-500 text-sm md:text-base">新增並設定常用好友名單（最多 {MAX_PEOPLE} 位）</p>
+          <p className="text-stone-500 text-sm md:text-base">新增並設定好友名單，最多 {MAX_PEOPLE} 位</p>
         </div>
         <button
           data-tutorial="people-qa-btn"
@@ -232,11 +233,11 @@ export default function PeoplePage() {
 
             <div>
               <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                小名 / 暱稱 <span className="text-stone-400 text-xs font-normal">(選填)</span>
+                小名 / 暱稱
               </label>
               <input
                 type="text"
-                placeholder="例如：阿明 (顯示於首頁快捷區)"
+                placeholder="例如：阿明"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
@@ -246,7 +247,7 @@ export default function PeoplePage() {
             {/* 國家選擇 */}
             <div data-tutorial="people-country">
               <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                國家 <span className="text-stone-400 text-xs font-normal">(選填)</span>
+                國家
               </label>
               <CountrySelect value={selectedCountry} onChange={setSelectedCountry} />
             </div>
@@ -254,7 +255,7 @@ export default function PeoplePage() {
             {/* 圖標選擇器 */}
             <div>
               <label className="block text-sm font-bold text-stone-600 mb-2">
-                代表圖樣 <span className="text-stone-400 text-xs font-normal">(選擇好友類型)</span>
+                代表圖樣
               </label>
               <div className="grid grid-cols-4 gap-2.5">
                 {ICON_PRESETS.map((preset) => {
@@ -300,7 +301,7 @@ export default function PeoplePage() {
         {/* 人物名冊清單 (右側欄，佔 7/12) */}
         <section className="md:col-span-7 mt-8 md:mt-0" data-tutorial="people-list">
           <h2 className="text-lg font-extrabold text-stone-850 mb-4">
-            👥 好友名冊 ({isSearching ? `符合 ${visiblePeople.length} / 共 ${people.length}` : people.length} 人)
+            👥 好友名冊 <CountPill>{isSearching ? `${visiblePeople.length} / ${people.length}` : people.length} 人</CountPill>
           </h2>
 
           {/* 搜尋：好友多時快速找人 */}
@@ -398,7 +399,7 @@ export default function PeoplePage() {
                         )}
                         {person.nickname && (
                           <span className="text-base font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full mt-1 inline-block truncate max-w-full">
-                            暱稱：{person.nickname}
+                            {person.nickname}
                           </span>
                         )}
                       </div>
