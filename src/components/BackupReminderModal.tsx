@@ -1,5 +1,6 @@
 import { ShieldAlert, Clock, LogIn } from 'lucide-react'
 import GoogleG from './GoogleG'
+import ModalShell from './ModalShell'
 
 const FLAG = 'piklog_backup_reminded'
 
@@ -20,7 +21,7 @@ export default function BackupReminderModal({ onGoogle, onLater }: Props) {
   const wrap = (fn: () => void) => () => { markSeen(); fn() }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+    <ModalShell onClose={wrap(onLater)} align="bottom">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-scale-up">
         <div className="px-6 pt-8 pb-6 text-center">
           <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -64,6 +65,6 @@ export default function BackupReminderModal({ onGoogle, onLater }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </ModalShell>
   )
 }

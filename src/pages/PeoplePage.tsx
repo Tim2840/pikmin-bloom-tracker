@@ -11,6 +11,7 @@ import { filterPeople } from '../services/peopleService'
 import { COUNTRY_CODES, countryLabel, countryFlag, countryName } from '../lib/countries'
 import TutorialOverlay from '../components/TutorialOverlay'
 import CountPill from '../components/CountPill'
+import ModalShell from '../components/ModalShell'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
@@ -433,8 +434,8 @@ export default function PeoplePage() {
 
       {/* 編輯 Dialog 彈窗 */}
       {editingPersonId && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl border border-stone-100 animate-scale-up max-h-[90vh] overflow-y-auto">
+        <ModalShell onClose={() => setEditingPersonId(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl border border-stone-100 animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-black text-stone-850">✏️ 編輯好友資料</h3>
               <button 
@@ -519,7 +520,7 @@ export default function PeoplePage() {
               </div>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* 說明按鈕 */}
@@ -546,7 +547,7 @@ export default function PeoplePage() {
 
       {/* 刪除確認 Dialog 彈窗 (長輩防誤觸) */}
       {deletingPersonId && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setDeletingPersonId(null)}>
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl border border-stone-100 text-center animate-scale-up">
             <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mx-auto mb-4">
               <Trash2 className="w-8 h-8" />
@@ -579,7 +580,7 @@ export default function PeoplePage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   )
