@@ -16,6 +16,7 @@ import { linkGoogle } from '../lib/auth'
 import { getHomeStats, mascotMood, resolvePersonColor } from '../services/recordService'
 import { RecordFormValues } from '../types'
 import RecordForm from '../components/RecordForm'
+import ModalShell from '../components/ModalShell'
 import BackupReminderModal, { hasSeenBackupReminder } from '../components/BackupReminderModal'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial, hasSeenTutorial } from '../hooks/useTutorial'
@@ -282,11 +283,8 @@ export default function HomePage() {
 
       {/* 新增紀錄 Modal */}
       {showAddModal && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false) }}
-        >
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-scale-up max-h-[90vh] overflow-y-auto">
+        <ModalShell onClose={() => setShowAddModal(false)} align="bottom">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-stone-100">
               <h2 className="text-lg font-black text-stone-800 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-sky-500" />
@@ -308,7 +306,7 @@ export default function HomePage() {
               />
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* 今日互動紀錄 */}

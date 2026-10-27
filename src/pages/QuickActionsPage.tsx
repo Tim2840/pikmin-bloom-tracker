@@ -7,6 +7,7 @@ import {
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import CountPill from '../components/CountPill'
+import ModalShell from '../components/ModalShell'
 import { ItemIcon } from '../components/PikIcon'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, ActionType } from '../types'
@@ -321,7 +322,7 @@ export default function QuickActionsPage() {
 
       {/* 刪除確認 Dialog */}
       {deletingId && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setDeletingId(null)}>
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl text-center">
             <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8 text-rose-500" />
@@ -345,7 +346,7 @@ export default function QuickActionsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   )

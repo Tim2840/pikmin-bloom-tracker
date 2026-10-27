@@ -11,6 +11,7 @@ import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import { formatDate } from '../lib/dateUtils'
 import { resolvePersonName, resolvePersonColor, filterRecords } from '../services/recordService'
 import RecordForm from '../components/RecordForm'
+import ModalShell from '../components/ModalShell'
 import { ItemIcon } from '../components/PikIcon'
 import { checkMilestone } from '../lib/milestones'
 import TutorialOverlay from '../components/TutorialOverlay'
@@ -251,8 +252,8 @@ export default function RecordsPage() {
 
       {/* 新增 Modal */}
       {showAdd && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto">
+        <ModalShell onClose={() => setShowAdd(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-black text-stone-800 flex items-center gap-2"><ItemIcon type="postcard" className="w-8 h-8" /> 新增互動紀錄</h3>
               <button
@@ -271,13 +272,13 @@ export default function RecordsPage() {
               cancelLabel="完成"
             />
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* 編輯 Modal */}
       {editingRecord && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto">
+        <ModalShell onClose={() => setEditingRecord(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-black text-stone-800">✏️ 編輯紀錄</h3>
               <button
@@ -295,12 +296,12 @@ export default function RecordsPage() {
               onCancel={() => setEditingRecord(null)}
             />
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* 刪除確認 Modal */}
       {deletingId && (
-        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setDeletingId(null)}>
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl text-center animate-scale-up">
             <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8 text-rose-500" />
@@ -322,7 +323,7 @@ export default function RecordsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
       {/* 說明按鈕 */}
       <button
