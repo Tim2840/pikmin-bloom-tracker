@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Check } from 'lucide-react'
 import { ItemType, ActionType, Person, RecordItem, RecordFormValues } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel } from '../lib/recordLabels'
 import DateSelect from './DateSelect'
+import { ItemIcon } from './PikIcon'
+import { celebrate } from '../lib/effects'
 
-const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
+const ITEM_OPTIONS: { value: ItemType; label: string }[] = [
   { value: 'postcard', ...ITEM_META.postcard },
   { value: 'mushroom', ...ITEM_META.mushroom },
 ]
@@ -50,6 +52,7 @@ export default function RecordForm({
   // 編輯既有紀錄且該好友還在名冊中：只顯示他，不需重選（好友已被刪除時才退回選單）
   const lockedPerson = initial ? people.find(p => p.id === initial.personId) : undefined
   const [submitting, setSubmitting] = useState(false)
+  const submitRef = useRef<HTMLButtonElement>(null)
   const [savedCount, setSavedCount] = useState(0)
 
   // 切換品項時保留方向（往外仍往外），僅把舊的 helped 正規化為 sent
@@ -80,6 +83,7 @@ export default function RecordForm({
       if (continuous && result !== false) {
         setNote('')
         setSavedCount(c => c + 1)
+        celebrate(submitRef.current)
       }
     } finally {
       setSubmitting(false)
@@ -157,7 +161,7 @@ export default function RecordForm({
                   : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300'
               }`}
             >
-              <span className="text-2xl">{opt.emoji}</span>
+              <ItemIcon type={opt.value} className="w-9 h-9" />
               {opt.label}
             </button>
           ))}
@@ -236,6 +240,7 @@ export default function RecordForm({
         </button>
         <button
           type="submit"
+          ref={submitRef}
           disabled={submitting}
           className="flex-1 h-12 rounded-xl bg-sky-600 text-white font-extrabold hover:bg-sky-700 disabled:opacity-60 transition-colors shadow-sm flex items-center justify-center gap-2"
         >

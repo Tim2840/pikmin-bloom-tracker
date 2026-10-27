@@ -77,3 +77,31 @@ body.tutorial-show-help button[title="查看使用說明"] {
   opacity: 1;
 }
 
+
+/* ===== 特效（可在設定頁關閉；系統開啟「減少動態」時自動停用） ===== */
+@keyframes fx-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes fx-squish { 0% { transform: scale(1); } 35% { transform: scale(.92, 1.06); } 70% { transform: scale(1.05, .96); } 100% { transform: scale(1); } }
+@keyframes fx-floatup {
+  0% { transform: translate(0, 0) scale(.4) rotate(0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); opacity: 0; }
+}
+@keyframes fx-fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
+@keyframes fx-pop-in { from { transform: translate(-50%, -50%) scale(.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+.fx-bob { animation: fx-bob 2.4s ease-in-out infinite; }
+.fx-tap { animation: fx-squish .35s ease; }
+.fx-pop { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; pointer-events: none; z-index: 5; animation: fx-floatup 1s ease-out forwards; }
+.fx-calm { box-shadow: 0 0 0 4px rgba(101, 163, 13, .3); transition: box-shadow .2s; }
+.fx-confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+.fx-piece { position: absolute; top: -12px; width: 10px; height: 16px; border-radius: 2px; animation: fx-fall linear forwards; }
+.fx-milestone {
+  position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 61; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; width: max-content; max-width: calc(100vw - 32px); white-space: nowrap;
+  background: #fff; color: #292524; border: 3px solid #65a30d; border-radius: 22px; padding: 18px 32px;
+  text-align: center; font-weight: 900; font-size: 1.5rem; box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+  animation: fx-pop-in .4s cubic-bezier(.2, 1.4, .4, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-bob, .fx-tap, .fx-pop, .fx-piece, .fx-milestone { animation: none !important; }
+}

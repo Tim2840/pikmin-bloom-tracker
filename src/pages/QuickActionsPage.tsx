@@ -7,11 +7,12 @@ import {
 import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import CountPill from '../components/CountPill'
+import { ItemIcon } from '../components/PikIcon'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { ItemType, ActionType } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel, buildQuickActionLabel } from '../lib/recordLabels'
 
-const ITEM_OPTIONS: { value: ItemType; emoji: string; label: string }[] = [
+const ITEM_OPTIONS: { value: ItemType; label: string }[] = [
   { value: 'postcard', ...ITEM_META.postcard },
   { value: 'mushroom', ...ITEM_META.mushroom },
 ]
@@ -170,7 +171,7 @@ export default function QuickActionsPage() {
                           : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300'
                       }`}
                     >
-                      <span className="text-2xl">{opt.emoji}</span>
+                      <ItemIcon type={opt.value} className="w-9 h-9" />
                       {opt.label}
                     </button>
                   ))}
@@ -265,7 +266,6 @@ export default function QuickActionsPage() {
             <div className="space-y-3">
               {quickActions.map((action, idx) => {
                 const person = people.find(p => p.id === action.personId)
-                const itemEmoji = ITEM_META[action.itemType].emoji
                 const actionLabel = actionButtonLabel(action.itemType, action.actionType)
                 return (
                   <div
@@ -295,7 +295,7 @@ export default function QuickActionsPage() {
                       className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0"
                       style={{ backgroundColor: `${person?.color || '#6B7280'}20` }}
                     >
-                      {itemEmoji}
+                      <ItemIcon type={action.itemType} className="w-8 h-8" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-extrabold text-stone-800 text-base truncate">{action.label}</p>

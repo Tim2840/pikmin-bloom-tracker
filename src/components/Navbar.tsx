@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { Home, Users, History, BarChart3, CalendarDays, Settings } from 'lucide-react'
+import PikIcon from './PikIcon'
 
 export default function Navbar() {
   const navItems = [
@@ -44,7 +45,7 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           {/* Logo 標題 */}
           <div className="flex items-center space-x-3 select-none">
-            <span className="text-3xl">🍄</span>
+            <PikIcon name="mushroom" className="w-10 h-10" />
             <span className="text-2xl font-black text-stone-800 tracking-tight">
               PikLog <span className="text-sm font-bold text-lime-600">紀錄器</span>
             </span>

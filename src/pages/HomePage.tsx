@@ -5,11 +5,15 @@ import { useQuickActionsStore } from '../stores/useQuickActionsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { useAuthStore } from '../stores/useAuthStore'
+import { useSettingsStore } from '../stores/useSettingsStore'
+import PikIcon, { ItemIcon } from '../components/PikIcon'
+import { celebrate } from '../lib/effects'
+import { checkMilestone } from '../lib/milestones'
 import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import { todayStr } from '../lib/dateUtils'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { linkGoogle } from '../lib/auth'
-import { getHomeStats, resolvePersonColor } from '../services/recordService'
+import { getHomeStats, mascotMood, resolvePersonColor } from '../services/recordService'
 import { RecordFormValues } from '../types'
 import RecordForm from '../components/RecordForm'
 import BackupReminderModal, { hasSeenBackupReminder } from '../components/BackupReminderModal'
@@ -57,6 +61,7 @@ export default function HomePage() {
   const { people, fetchPeople } = usePeopleStore()
   const { records, fetchRecords, addRecord } = useRecordsStore()
   const { isAnonymous, loading: authLoading } = useAuthStore()
+  const effects = useSettingsStore(s => s.settings.effects)
 
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [tapping, setTapping] = useState<string | null>(null)
@@ -89,7 +94,7 @@ export default function HomePage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleQuickAction = async (actionId: string) => {
+  const handleQuickAction = async (actionId: string, button: HTMLElement) => {
     if (tapping) return
     const action = quickActions.find(a => a.id === actionId)
     if (!action) return
@@ -115,6 +120,8 @@ export default function HomePage() {
     if (success) {
       const meta = ITEM_META[action.itemType]
       showToast(`已記錄：${person.name} / ${date} / ${meta.label}`)
+      celebrate(button)
+      checkMilestone(useRecordsStore.getState().records.length)
     } else {
       showToast('紀錄失敗，請重試。', 'error')
     }
@@ -125,6 +132,7 @@ export default function HomePage() {
     if (success) {
       const meta = ITEM_META[values.itemType]
       showToast(`已記錄：${values.personNameSnapshot} / ${values.date} / ${meta.label}`)
+      checkMilestone(useRecordsStore.getState().records.length)
       setShowAddModal(false)
     } else {
       showToast('紀錄失敗，請重試。', 'error')
@@ -154,8 +162,8 @@ export default function HomePage() {
       {/* Hero */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-16 mb-10">
         <div className="flex flex-col items-center md:items-start text-center md:text-left md:flex-1">
-          <div className="w-20 h-20 bg-lime-100 rounded-3xl flex items-center justify-center shadow-inner mb-6 animate-bounce">
-            <span className="text-4xl">🍄</span>
+          <div className={`w-24 h-24 bg-lime-100 rounded-3xl flex items-center justify-center shadow-inner mb-6 ${effects ? 'fx-bob' : ''}`}>
+            <PikIcon name="mushroom" mood={mascotMood(records, today)} className="w-20 h-20" />
           </div>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-stone-800 tracking-tight mb-3 leading-tight">
             PikLog<br />
@@ -239,12 +247,11 @@ export default function HomePage() {
           </button>
           {quickActions.map(action => {
             const person = people.find(p => p.id === action.personId)
-            const itemEmoji = ITEM_META[action.itemType].emoji
             const isTapping = tapping === action.id
             return (
               <button
                 key={action.id}
-                onClick={() => handleQuickAction(action.id)}
+                onClick={(e) => handleQuickAction(action.id, e.currentTarget)}
                 disabled={isTapping}
                 className="accessible-target flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-base text-white shadow-md transition-all active:scale-95 disabled:opacity-60"
                 style={{
@@ -255,7 +262,7 @@ export default function HomePage() {
                 {isTapping ? (
                   <span className="w-5 h-5 border-2 border-white/60 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <span className="text-xl">{itemEmoji}</span>
+                  <ItemIcon type={action.itemType} className="w-8 h-8" />
                 )}
                 {action.label}
               </button>
@@ -328,15 +335,14 @@ export default function HomePage() {
         ) : (
           <div className="space-y-2">
             {todayRecords.map(r => {
-              const meta = ITEM_META[r.itemType]
               const color = resolvePersonColor(r, people)
               return (
                 <div key={r.id} className="glass-card rounded-2xl px-4 py-3 flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${color}20` }}
                   >
-                    {meta.emoji}
+                    <ItemIcon type={r.itemType} className="w-8 h-8" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">

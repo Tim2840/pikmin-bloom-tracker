@@ -11,6 +11,8 @@ import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import { formatDate } from '../lib/dateUtils'
 import { resolvePersonName, resolvePersonColor, filterRecords } from '../services/recordService'
 import RecordForm from '../components/RecordForm'
+import { ItemIcon } from '../components/PikIcon'
+import { checkMilestone } from '../lib/milestones'
 import TutorialOverlay from '../components/TutorialOverlay'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
@@ -48,6 +50,7 @@ export default function RecordsPage() {
     const success = await addRecord(values)
     if (success) {
       showToast(`已記錄：${values.personNameSnapshot} / ${formatDate(values.date)} / ${ITEM_META[values.itemType].label}`)
+      checkMilestone(useRecordsStore.getState().records.length)
     } else {
       showToast('新增失敗，請重試。', 'error')
     }
@@ -87,7 +90,7 @@ export default function RecordsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-stone-800 tracking-tight flex items-center gap-2">
-            📮 互動紀錄
+            <ItemIcon type="postcard" className="w-9 h-9" /> 互動紀錄
           </h1>
           <p className="text-stone-500 text-sm md:text-base mt-0.5">記錄每次與好友的明信片與打蘑菇</p>
         </div>
@@ -153,8 +156,8 @@ export default function RecordsPage() {
               className="bg-transparent text-sm text-stone-700 font-medium py-2.5 flex-1 focus:outline-none"
             >
               <option value="all">所有品項</option>
-              <option value="postcard">📮 明信片</option>
-              <option value="mushroom">🍄 蘑菇</option>
+              <option value="postcard">明信片</option>
+              <option value="mushroom">蘑菇</option>
             </select>
           </div>
           {hasFilter && (
@@ -199,7 +202,6 @@ export default function RecordsPage() {
             {hasFilter ? `篩選結果：共 ${filtered.length} 筆` : `顯示最近 ${filtered.length} 筆`}
           </p>
           {filtered.map(r => {
-            const meta = ITEM_META[r.itemType]
             return (
               <div key={r.id} className="glass-card rounded-2xl p-4 flex items-center gap-3 group">
                 {/* 品項 emoji */}
@@ -207,7 +209,7 @@ export default function RecordsPage() {
                   className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
                   style={{ backgroundColor: `${resolvePersonColor(r, people)}20` }}
                 >
-                  {meta.emoji}
+                  <ItemIcon type={r.itemType} className="w-9 h-9" />
                 </div>
 
                 {/* 主要資訊 */}
@@ -252,7 +254,7 @@ export default function RecordsPage() {
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-black text-stone-800">📮 新增互動紀錄</h3>
+              <h3 className="text-lg font-black text-stone-800 flex items-center gap-2"><ItemIcon type="postcard" className="w-8 h-8" /> 新增互動紀錄</h3>
               <button
                 onClick={() => setShowAdd(false)}
                 className="accessible-target flex items-center justify-center text-stone-400 hover:text-stone-700"

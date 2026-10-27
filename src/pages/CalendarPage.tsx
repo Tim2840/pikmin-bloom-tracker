@@ -3,12 +3,13 @@ import { ChevronLeft, ChevronRight, CalendarDays, HelpCircle } from 'lucide-reac
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { usePeopleStore } from '../stores/usePeopleStore'
 import { RecordItem } from '../types'
-import { ITEM_META, ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
+import { ACTION_STYLE, actionFullLabel } from '../lib/recordLabels'
 import {
   buildMonthGrid, WEEKDAY_LABELS, MONTH_LABEL, shiftMonth, todayStr, formatDateLong,
 } from '../lib/dateUtils'
 import TutorialOverlay from '../components/TutorialOverlay'
 import CountPill from '../components/CountPill'
+import { ItemIcon } from '../components/PikIcon'
 import { useTutorial } from '../hooks/useTutorial'
 import { TUTORIAL_STEPS, TUTORIAL_COMPLETE } from '../lib/tutorialData'
 
@@ -192,11 +193,10 @@ export default function CalendarPage() {
           ) : (
             <div className="space-y-2">
               {selectedRecords.map(r => {
-                const meta = ITEM_META[r.itemType]
                 return (
                   <div key={r.id} className="flex items-center gap-3 bg-white/60 rounded-2xl p-3">
                     <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-xl shrink-0">
-                      {meta.emoji}
+                      <ItemIcon type={r.itemType} className="w-8 h-8" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">

@@ -6,7 +6,7 @@
 
 - **Stack**：Vite + React 18 + TypeScript + Tailwind + Zustand + Supabase + react-router-dom
 - **開發**：`npm run dev`
-- **驗證（改完務必跑）**：`npx tsc --noEmit`（快速型別檢查）或 `npm run build`（完整：`tsc -b && vite build`）
+- **驗證（改完務必跑）**：`npx tsc -b`（型別檢查；**不要只跑 `tsc --noEmit`**，它不檢查 app 的 tsconfig，會漏掉未使用變數與型別錯誤）、`npm test`，或 `npm run build`（完整：`tsc -b && vite build`）
 - `dist/` 為 build 產物，已加入 `.gitignore`，**不要 commit**
 
 ## 規格來源
@@ -27,6 +27,10 @@
 - 用 `isSupabaseConfigured()` 判斷是否有設定金鑰；沒有就純本地模式
 - Supabase 失敗時保留本地變更並回報 error，**不** rollback
 - 新增 store 請沿用此模式
+
+### 圖示與特效
+- 品項（明信片／蘑菇）圖示一律用 `components/PikIcon` 的 `ItemIcon`，**不要再用 📮🍄 emoji**；圖示造型集中在 `src/lib/pikIcons.ts`（A 貼紙風，原創造型，不仿官方角色）。
+- 記錄成功的慶祝用 `lib/effects.ts` 的 `celebrate(button)`，里程碑用 `lib/milestones.ts` 的 `checkMilestone(總筆數)`。特效一律不接收點擊、不到 1 秒（里程碑約 2.6 秒）、遵守系統「減少動態」與設定頁「特效」開關。
 
 ### 文案集中管理
 品項與方向的所有顯示文字集中在 `src/lib/recordLabels.ts`，三個頁面共用。
