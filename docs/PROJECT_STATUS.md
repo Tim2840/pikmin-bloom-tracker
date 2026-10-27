@@ -77,7 +77,8 @@
 - 這部分是瀏覽器行為，目前只有手動／腳本實測，沒有放進 CI 自動測試。
 
 ## 自製圖示與特效（已上線）
-- **圖示**：`src/lib/pikIcons.ts` 畫 SVG 字串（A 貼紙風：小蘑菇、信封明信片、小芽、愛心、星星），`PikIcon` / `ItemIcon` 元件使用。已取代各頁品項 emoji（首頁、紀錄、月曆、統計、往來頁、快捷動作、導覽列 logo）。好友「代表圖樣」仍是原本 8 個 Lucide 圖示（資料相容）；底部導覽與 PWA 桌面圖示尚未重畫。
+- **圖示**：`src/lib/pikIcons.ts` 畫 SVG 字串（A 貼紙風：小蘑菇、信封明信片、小芽、愛心、星星），`PikIcon` / `ItemIcon` 元件使用。已取代各頁品項 emoji（首頁、紀錄、月曆、統計、往來頁、快捷動作、導覽列 logo）。好友「代表圖樣」仍是原本 8 個 Lucide 圖示（資料相容）；底部導覽圖示尚未重畫。
+- **桌面／App 圖示**：`public/` 的 `pwa-192/512.png`、`pwa-maskable-512.png`（蘑菇縮到中央 60%，落在遮罩安全圈內）、`apple-touch-icon.png`、`icons/icon-*.png` 都已換成新小蘑菇（綠底＋貼紙風蘑菇）。這些 PNG 由 `pikIcon('mushroom','happy')` 渲染而成；日後改造型要重新產生這幾張。
 - **首頁吉祥物**：蘑菇依 `mascotMood` 換表情——今天有互動開心、1–6 天沒互動普通、7 天以上打瞌睡。
 - **小慶祝**：快捷鈕與紀錄表單（連續新增）儲存成功時圖示彈一下＋飄愛心星星（9 個，1.2 秒內連點減為 3 個）；`pointer-events: none`、不到 1 秒。
 - **里程碑**：累計 10／50／100／200／500／1000 筆時一次性彩帶＋「第 N 筆！」（約 2.6 秒、不接收點擊），已慶祝的記在 `piklog_milestones_shown`，刪除再補回不重複。
@@ -114,7 +115,7 @@
 - 🔴 線上「Supabase 連線失敗 (TypeError: Failed to fetch)」：瀏覽器連不到 Supabase 主機。最常見原因＝免費專案閒置 7 天被**暫停**（Dashboard → Restore project）；其次是 GitHub secret `VITE_SUPABASE_URL` 填錯。沙箱連不到 Supabase，無法代測。
 - 🔲 使用者實機驗收「用 Google 繼續」自動取回流程（沙箱連不到 Google/Supabase，無法代測）。已綁過情境會閃一下 Google 第二次跳轉（自動取回）。
 - ℹ️ npm audit 5 個漏洞**全為 dev 相依**（`npm audit --omit=dev` = 0），不影響線上。
-- ℹ️ PWA 蘑菇圖示需「刪舊捷徑 → 清快取 → 重新安裝」才會更新。
+- ℹ️ 已安裝的桌面捷徑圖示是系統快取的：需「刪舊捷徑 → 重新加入主畫面」才會換成新圖示（網頁本身重開即可更新）。
 - 💤 之前提過、未做：async session hook、Apple 登入（需 $99/年）。（測試已綁進部署 CI。）
 
 ## 開發指令
