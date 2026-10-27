@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { RecordItem } from '../types'
 import { findInactiveFriends } from '../services/peopleService'
 import { STAT_LABELS } from '../lib/recordLabels'
+import { ItemIcon } from '../components/PikIcon'
 import { DirectionCounts, addToDirectionCounts, countByDirection, emptyDirectionCounts } from '../services/recordService'
 import { RANGE_OPTIONS, RangeKey, isInRange, formatDate, todayStr } from '../lib/dateUtils'
 import TutorialOverlay from '../components/TutorialOverlay'
@@ -212,17 +213,17 @@ export default function StatsPage() {
                   </div>
                   {/* 往外 / 往內分開顯示：我寄出、對方寄來；我邀請他、他邀請我 */}
                   <div className="flex flex-wrap gap-2 mt-2 ml-6 text-base font-bold">
-                    <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 tabular-nums">
-                      📮 {STAT_LABELS.postcard.sent} {s.counts.postcard.sent}
+                    <span className="px-3 py-1 rounded-full inline-flex items-center gap-1 bg-amber-50 text-amber-700 tabular-nums">
+                      <ItemIcon type="postcard" className="w-6 h-6" /> {STAT_LABELS.postcard.sent} {s.counts.postcard.sent}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 tabular-nums">
-                      📮 {STAT_LABELS.postcard.received} {s.counts.postcard.received}
+                    <span className="px-3 py-1 rounded-full inline-flex items-center gap-1 bg-orange-50 text-orange-700 tabular-nums">
+                      <ItemIcon type="postcard" className="w-6 h-6" /> {STAT_LABELS.postcard.received} {s.counts.postcard.received}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-violet-50 text-violet-700 tabular-nums">
-                      🍄 {STAT_LABELS.mushroom.sent} {s.counts.mushroom.sent}
+                    <span className="px-3 py-1 rounded-full inline-flex items-center gap-1 bg-violet-50 text-violet-700 tabular-nums">
+                      <ItemIcon type="mushroom" className="w-6 h-6" /> {STAT_LABELS.mushroom.sent} {s.counts.mushroom.sent}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-fuchsia-50 text-fuchsia-700 tabular-nums">
-                      🍄 {STAT_LABELS.mushroom.received} {s.counts.mushroom.received}
+                    <span className="px-3 py-1 rounded-full inline-flex items-center gap-1 bg-fuchsia-50 text-fuchsia-700 tabular-nums">
+                      <ItemIcon type="mushroom" className="w-6 h-6" /> {STAT_LABELS.mushroom.received} {s.counts.mushroom.received}
                     </span>
                   </div>
                 </div>

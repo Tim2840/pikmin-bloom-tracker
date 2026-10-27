@@ -1,9 +1,9 @@
 import { ItemType, ActionType } from '../types'
 
-// 品項基本資訊（emoji + 名稱）
-export const ITEM_META: Record<ItemType, { emoji: string; label: string }> = {
-  postcard: { emoji: '📮', label: '明信片' },
-  mushroom: { emoji: '🍄', label: '蘑菇' },
+// 品項名稱（圖示用 components/PikIcon 的 ItemIcon，不再用 emoji）
+export const ITEM_META: Record<ItemType, { label: string }> = {
+  postcard: { label: '明信片' },
+  mushroom: { label: '蘑菇' },
 }
 
 // 新增紀錄時可選的方向：兩種品項都用「往外 / 往內」雙向

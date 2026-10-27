@@ -1,4 +1,6 @@
+import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { RecordItem, Person, ItemType } from '../types'
+import { PikMood } from '../lib/pikIcons'
 
 export function resolvePersonName(r: RecordItem, people: Person[]): string {
   if (r.personId) {
@@ -64,4 +66,13 @@ export function countByDirection(records: RecordItem[]): DirectionCounts {
   const counts = emptyDirectionCounts()
   for (const r of records) addToDirectionCounts(counts, r)
   return counts
+}
+
+// 首頁吉祥物的表情：今天有互動 = 開心；7 天以上沒互動 = 打瞌睡；其餘（含還沒有紀錄）= 普通
+export function mascotMood(records: RecordItem[], today: string): PikMood {
+  if (records.length === 0) return 'normal'
+  const last = records.reduce((m, r) => (r.date > m ? r.date : m), '')
+  const days = differenceInCalendarDays(parseISO(today), parseISO(last))
+  if (days <= 0) return 'happy'
+  return days >= 7 ? 'sleepy' : 'normal'
 }

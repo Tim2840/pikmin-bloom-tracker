@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut, FileDown } from 'lucide-react'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut, FileDown, Sparkles } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -19,7 +19,7 @@ const PRESETS = [
 ]
 
 export default function SettingsPage() {
-  const { settings, setFontScale, reset } = useSettingsStore()
+  const { settings, setFontScale, setEffects, reset } = useSettingsStore()
   const scale = settings.fontScale
   const { user, isAnonymous } = useAuthStore()
   const [authError, setAuthError] = useState('')
@@ -136,7 +136,7 @@ export default function SettingsPage() {
         {/* 即時預覽 */}
         <div className="mt-5 bg-stone-50 border border-stone-100 rounded-2xl p-4">
           <p className="text-sm text-stone-400 mb-2">預覽</p>
-          <p className="text-base text-stone-800 font-medium mb-3">🍄 今天和小美互相寄了明信片！</p>
+          <p className="text-base text-stone-800 font-medium mb-3">今天和小美互相寄了明信片！</p>
           <button className="accessible-target inline-flex items-center px-4 py-2 rounded-xl bg-lime-600 text-white font-extrabold text-lg">
             按鈕範例
           </button>
@@ -217,6 +217,24 @@ export default function SettingsPage() {
           )}
         </section>
       )}
+
+      {/* 特效 */}
+      <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">
+        <h2 className="text-lg font-extrabold text-stone-800 mb-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-lime-600" /> 特效
+        </h2>
+        <button
+          role="switch"
+          aria-checked={settings.effects}
+          onClick={() => setEffects(!settings.effects)}
+          className="accessible-target w-full flex items-center justify-between gap-4 rounded-2xl bg-white/60 border border-stone-100 px-4 py-3 text-left"
+        >
+          <span className="text-lg font-bold text-stone-800">記錄後的慶祝動畫</span>
+          <span className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${settings.effects ? 'bg-lime-600' : 'bg-stone-300'}`}>
+            <span className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-all ${settings.effects ? 'left-7' : 'left-1'}`} />
+          </span>
+        </button>
+      </section>
 
       {/* 匯出資料 */}
       <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">

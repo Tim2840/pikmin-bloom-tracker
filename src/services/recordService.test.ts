@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { countByDirection } from './recordService'
+import { countByDirection, mascotMood } from './recordService'
 import { RecordItem } from '../types'
 
 const rec = (itemType: RecordItem['itemType'], actionType: RecordItem['actionType']): RecordItem => ({
@@ -33,5 +33,25 @@ describe('countByDirection', () => {
       postcard: { sent: 0, received: 0 },
       mushroom: { sent: 0, received: 0 },
     })
+  })
+})
+
+describe('mascotMood', () => {
+  const today = '2026-10-27'
+  const r = (date: string) => ({ ...rec('postcard', 'sent'), date })
+
+  it('今天有互動 = 開心', () => {
+    expect(mascotMood([r('2026-10-27'), r('2026-09-01')], today)).toBe('happy')
+  })
+  it('1 到 6 天沒互動 = 普通', () => {
+    expect(mascotMood([r('2026-10-26')], today)).toBe('normal')
+    expect(mascotMood([r('2026-10-21')], today)).toBe('normal')
+  })
+  it('7 天以上沒互動 = 打瞌睡', () => {
+    expect(mascotMood([r('2026-10-20')], today)).toBe('sleepy')
+    expect(mascotMood([r('2026-01-01')], today)).toBe('sleepy')
+  })
+  it('還沒有任何紀錄 = 普通', () => {
+    expect(mascotMood([], today)).toBe('normal')
   })
 })

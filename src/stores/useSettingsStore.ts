@@ -3,11 +3,13 @@ import { create } from 'zustand'
 export interface AppSettings {
   /** 介面整體縮放：1.0 = 100%（基準 16px） */
   fontScale: number
+  /** 記錄後的慶祝動畫與里程碑彩帶 */
+  effects: boolean
 }
 
 const LOCAL_KEY = 'piklog_settings'
 
-const DEFAULT_SETTINGS: AppSettings = { fontScale: 1.0 }
+const DEFAULT_SETTINGS: AppSettings = { fontScale: 1.0, effects: true }
 
 /** 縮放範圍護欄（與設定頁滑桿一致） */
 export const MIN_SCALE = 0.85
@@ -21,7 +23,7 @@ export const getLocalSettings = (): AppSettings => {
     const local = localStorage.getItem(LOCAL_KEY)
     if (!local) return DEFAULT_SETTINGS
     const parsed = JSON.parse(local) as Partial<AppSettings>
-    return { fontScale: clampScale(parsed.fontScale ?? 1) }
+    return { fontScale: clampScale(parsed.fontScale ?? 1), effects: parsed.effects ?? true }
   } catch {
     return DEFAULT_SETTINGS
   }
@@ -43,23 +45,31 @@ export const applyFontScale = (scale: number) => {
 interface SettingsState {
   settings: AppSettings
   setFontScale: (scale: number) => void
+  setEffects: (on: boolean) => void
   reset: () => void
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: getLocalSettings(),
 
   setFontScale: (scale) => {
     const fontScale = clampScale(scale)
-    const next = { fontScale }
+    const next = { ...get().settings, fontScale }
     saveLocalSettings(next)
     applyFontScale(fontScale)
     set({ settings: next })
   },
 
+  setEffects: (effects) => {
+    const next = { ...get().settings, effects }
+    saveLocalSettings(next)
+    set({ settings: next })
+  },
+
   reset: () => {
-    saveLocalSettings(DEFAULT_SETTINGS)
-    applyFontScale(DEFAULT_SETTINGS.fontScale)
-    set({ settings: DEFAULT_SETTINGS })
+    const next = { ...get().settings, fontScale: DEFAULT_SETTINGS.fontScale }
+    saveLocalSettings(next)
+    applyFontScale(next.fontScale)
+    set({ settings: next })
   },
 }))
