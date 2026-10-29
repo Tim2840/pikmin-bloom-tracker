@@ -8,7 +8,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // prompt：偵測到新版時由 UpdatePrompt 通知使用者，按「更新」才換上（避免輸入到一半被強制重新整理）
+      registerType: 'prompt',
       includeAssets: ['apple-touch-icon.png', 'guide.html'],
       manifest: {
         name: 'PikLog — Pikmin Bloom 互動紀錄器',

@@ -10,12 +10,14 @@ import CalendarPage from './pages/CalendarPage'
 import SettingsPage from './pages/SettingsPage'
 import AuthHashNotice from './components/AuthHashNotice'
 import MilestoneOverlay from './components/MilestoneOverlay'
+import UpdatePrompt from './components/UpdatePrompt'
 
 export default function App() {
   return (
     <Router basename="/pikmin-bloom-tracker">
       <AuthHashNotice />
       <MilestoneOverlay />
+      <UpdatePrompt />
       <Navbar />
       <main className="flex-1 pb-32 pt-6 md:pb-16 md:pt-8 max-w-full md:max-w-6xl mx-auto w-full px-4 md:px-6">
         <Routes>

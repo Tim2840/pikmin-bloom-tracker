@@ -69,6 +69,15 @@
 ## 後續想法（待使用者決定）
 - 首頁「今天還沒寄給誰」清單；快捷鈕誤點「復原」與同日重複寄出提醒；匯入 CSV；字級修正（仍有數處 `text-xs`，低於 16px 規則）。
 
+## 新版本通知（已上線）
+- PWA 更新策略由 `autoUpdate` 改為 `prompt`（`vite.config.ts` 的 `registerType`）。偵測到新版時，畫面下方出現「有新版本［更新］」（`components/UpdatePrompt.tsx`，用 `virtual:pwa-register/react`）；按「更新」才換上並重新載入，不會自己重新整理，所以不會打斷輸入。
+- 主動檢查：每小時一次，以及使用者切回 App（`visibilitychange`）時各檢查一次；離線時略過。常駐桌面的 App 因此也會知道有新版。
+- 提示 `z-40`（低於彈窗）、手機在底部導覽上方（`bottom-24`）、電腦在右下（`md:bottom-6`）。
+- **已驗證的流程**：舊版開著 → 重新打包出新版 → 切回 App → 出現提示 → 按「更新」→ 載入新 CSS、提示消失。腳本做法：先 build、起 `vite preview`、在頁面載入並讓 SW 接管，再改一條樣式重新 build，觸發 `visibilitychange` 後檢查。
+- **注意**：這次上線前就在用舊版的人**看不到**這次的提示（他們手上的版本還沒有這個元件），會照舊在下次完整重開時靜默換新；從這個版本開始才會有提示。
+- 提示的 `animate-scale-up` 會覆蓋 `transform`，所以置中不能用 `-translate-x-1/2`，要用 `inset-x-0 mx-auto w-max`。
+- 桌面捷徑的圖示不在這個機制內（系統快取，需重新加入）。
+
 ## 彈窗行為（已上線）
 - 所有彈窗共用 `components/ModalShell`：開啟時用 `lib/scrollLock.ts` 把頁面定住（`position: fixed`，iOS 也擋得住），關閉後捲回原位；點背景空白處或按 Esc 關閉；要「按下與放開都在背景」才關，避免在輸入框拖曳選字時誤關。
 - 共 7 個彈窗已套用：新增／編輯／刪除紀錄、編輯／刪除好友、刪除快捷動作、首頁新增紀錄；首次登入提醒（`BackupReminderModal`）點背景 = 按「稍後」。
