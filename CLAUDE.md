@@ -32,6 +32,11 @@
 - 品項（明信片／蘑菇）圖示一律用 `components/PikIcon` 的 `ItemIcon`，**不要再用 📮🍄 emoji**；圖示造型集中在 `src/lib/pikIcons.ts`（A 貼紙風，原創造型，不仿官方角色）。
 - 記錄成功的慶祝用 `lib/effects.ts` 的 `celebrate(button)`，里程碑用 `lib/milestones.ts` 的 `checkMilestone(總筆數)`。特效一律不接收點擊、不到 1 秒（里程碑約 2.6 秒）、遵守系統「減少動態」與設定頁「特效」開關。
 
+### 更新紀錄
+- 使用者在「設定 > 更新紀錄」查閱版本歷程，資料在 `src/lib/changelog.ts`（最新在最前面，`APP_VERSION` 取第一筆）。
+- **每次有使用者看得到的改動上線，同一個 PR 裡就要在最前面新增一筆**並把版本號往上加：新功能加 minor，修正加 patch。白話、簡短、不用括號。純文件或內部調整不用寫。
+- `changelog.test.ts` 會檢查版本遞減、日期格式、不放括號，格式錯了測試會擋下來。
+
 ### 文案集中管理
 品項與方向的所有顯示文字集中在 `src/lib/recordLabels.ts`，三個頁面共用。
 要調整任何標籤文案，**只改這個檔案**，不要散落在各頁。

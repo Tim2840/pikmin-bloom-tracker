@@ -8,14 +8,17 @@ import RecordsPage from './pages/RecordsPage'
 import StatsPage from './pages/StatsPage'
 import CalendarPage from './pages/CalendarPage'
 import SettingsPage from './pages/SettingsPage'
+import ChangelogPage from './pages/ChangelogPage'
 import AuthHashNotice from './components/AuthHashNotice'
 import MilestoneOverlay from './components/MilestoneOverlay'
 import UpdatePrompt from './components/UpdatePrompt'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   return (
     <Router basename="/pikmin-bloom-tracker">
       <AuthHashNotice />
+      <ScrollToTop />
       <MilestoneOverlay />
       <UpdatePrompt />
       <Navbar />
@@ -29,6 +32,7 @@ export default function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/changelog" element={<ChangelogPage />} />
         </Routes>
       </main>
     </Router>

@@ -69,6 +69,12 @@
 ## 後續想法（待使用者決定）
 - 首頁「今天還沒寄給誰」清單；快捷鈕誤點「復原」與同日重複寄出提醒；匯入 CSV；字級修正（仍有數處 `text-xs`，低於 16px 規則）。
 
+## 更新紀錄（已上線）
+- 設定頁「更新紀錄」入口（顯示目前版本，沒看過這版時有「新」標記）→ `/changelog`（`ChangelogPage`），由新到舊列出每個版本的日期與說明。資料在 `src/lib/changelog.ts`，`APP_VERSION` 取第一筆；「看過」記在 `piklog_changelog_seen`。
+- **維護規則（已寫進 `CLAUDE.md`）**：每次有使用者看得到的改動上線，同一個 PR 在最前面新增一筆並把版本號往上加（新功能 minor、修正 patch）；白話、簡短、不用括號。`changelog.test.ts` 檢查版本遞減、日期格式、不含括號。
+- 1.0.0 到 1.8.0 是依 git 歷史回填的；日期為台灣時間。
+- 順手加了 `ScrollToTop`：換頁自動捲回頂端（之前從長頁面下方點進新頁會停在中段，好友往來頁也有）。
+
 ## 新版本通知（已上線）
 - PWA 更新策略由 `autoUpdate` 改為 `prompt`（`vite.config.ts` 的 `registerType`）。偵測到新版時，畫面下方出現「有新版本［更新］」（`components/UpdatePrompt.tsx`，用 `virtual:pwa-register/react`）；按「更新」才換上並重新載入，不會自己重新整理，所以不會打斷輸入。
 - 主動檢查：每小時一次，以及使用者切回 App（`visibilitychange`）時各檢查一次；離線時略過。常駐桌面的 App 因此也會知道有新版。
