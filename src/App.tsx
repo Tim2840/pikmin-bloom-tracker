@@ -13,6 +13,7 @@ import AuthHashNotice from './components/AuthHashNotice'
 import MilestoneOverlay from './components/MilestoneOverlay'
 import UpdatePrompt from './components/UpdatePrompt'
 import ScrollToTop from './components/ScrollToTop'
+import WhatsNewModal from './components/WhatsNewModal'
 
 export default function App() {
   return (
@@ -35,6 +36,8 @@ export default function App() {
           <Route path="/changelog" element={<ChangelogPage />} />
         </Routes>
       </main>
+      {/* 放在最後：彈窗要蓋在導覽列上面 */}
+      <WhatsNewModal />
     </Router>
   )
 }
