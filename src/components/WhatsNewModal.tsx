@@ -10,7 +10,11 @@ import {
 // 更新完成後第一次打開，彈出「更新了什麼」。全新使用者不彈，但會先記下目前版本，之後的更新才會通知。
 function decide() {
   const lastSeen = getLastSeenVersion()
-  if (shouldShowWhatsNew(lastSeen, hasUsedBefore())) return entriesSince(lastSeen)
+  if (shouldShowWhatsNew(lastSeen, hasUsedBefore())) {
+    const entries = entriesSince(lastSeen)
+    if (entries.length > 0) return entries
+    // 記錄的版本比現在還新（例如舊版快取跑出來）：沒有東西可說，不要彈出空的視窗
+  }
   if (lastSeen !== APP_VERSION) markChangelogSeen()
   return null
 }
