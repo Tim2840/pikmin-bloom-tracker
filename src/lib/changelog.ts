@@ -8,6 +8,7 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  { version: '1.11.0', date: '2026-10-29', items: ['更新時會顯示進度條和百分比'] },
   { version: '1.10.0', date: '2026-10-29', items: ['更新完成後，會告訴你這次更新了什麼'] },
   { version: '1.9.0', date: '2026-10-29', items: ['新增更新紀錄，可以隨時查看每次更新了什麼', '換頁時會自動回到最上面'] },
   { version: '1.8.0', date: '2026-10-29', items: ['有新版本時，畫面下方會提醒你，按「更新」就能換上'] },
