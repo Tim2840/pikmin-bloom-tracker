@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import { ItemType, ActionType, Person, RecordItem, RecordFormValues } from '../types'
 import { ITEM_META, DIRECTIONS, actionButtonLabel } from '../lib/recordLabels'
 import DateSelect from './DateSelect'
+import PersonPicker from './PersonPicker'
 import { ItemIcon } from './PikIcon'
 import { celebrate } from '../lib/effects'
 
@@ -131,16 +132,11 @@ export default function RecordForm({
             尚無好友，請先到「人物管理」新增。
           </p>
         ) : (
-          <select
+          <PersonPicker
+            people={people}
             value={personId}
-            onChange={e => { setPersonId(e.target.value); setErrorText('') }}
-            className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sky-400 bg-white text-base text-stone-800"
-          >
-            <option value="">請選擇好友</option>
-            {people.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+            onChange={id => { setPersonId(id); setErrorText('') }}
+          />
         )}
         </>
         )}
