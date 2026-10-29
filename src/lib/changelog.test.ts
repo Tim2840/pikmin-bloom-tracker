@@ -1,12 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CHANGELOG, APP_VERSION } from './changelog'
-
-const parts = (v: string) => v.split('.').map(Number)
-const cmp = (a: string, b: string) => {
-  const [x, y] = [parts(a), parts(b)]
-  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]
-  return 0
-}
+import { CHANGELOG, APP_VERSION, compareVersions as cmp, entriesSince, shouldShowWhatsNew } from './changelog'
 
 describe('changelog', () => {
   it('版本號格式正確且不重複', () => {
@@ -37,5 +30,48 @@ describe('changelog', () => {
 
   it('目前版本就是最新一筆', () => {
     expect(APP_VERSION).toBe(CHANGELOG[0].version)
+  })
+})
+
+describe('compareVersions', () => {
+  it('依數字比較，而不是字串（1.10.0 比 1.9.0 新）', () => {
+    expect(cmp('1.10.0', '1.9.0')).toBeGreaterThan(0)
+    expect(cmp('1.9.0', '1.10.0')).toBeLessThan(0)
+    expect(cmp('2.0.0', '1.99.99')).toBeGreaterThan(0)
+    expect(cmp('1.2.3', '1.2.3')).toBe(0)
+  })
+})
+
+describe('shouldShowWhatsNew', () => {
+  it('已經看過目前版本就不彈', () => {
+    expect(shouldShowWhatsNew(APP_VERSION, true)).toBe(false)
+  })
+  it('全新使用者不彈', () => {
+    expect(shouldShowWhatsNew(null, false)).toBe(false)
+  })
+  it('用過 App 但沒有版本記錄（舊版使用者）要彈', () => {
+    expect(shouldShowWhatsNew(null, true)).toBe(true)
+  })
+  it('看過舊版本，現在是新版本就彈', () => {
+    expect(shouldShowWhatsNew('1.0.0', true)).toBe(true)
+  })
+})
+
+describe('entriesSince', () => {
+  it('只給上次看到的版本之後的更新，由新到舊', () => {
+    const got = entriesSince('1.8.0')
+    expect(got.length).toBeGreaterThan(0)
+    for (const e of got) expect(cmp(e.version, '1.8.0')).toBeGreaterThan(0)
+    expect(got[0].version).toBe(APP_VERSION)
+  })
+  it('最多 3 筆', () => {
+    expect(entriesSince('1.0.0').length).toBe(3)
+    expect(entriesSince('1.0.0', 2).length).toBe(2)
+  })
+  it('不知道上次看到哪一版時只給最新一筆', () => {
+    expect(entriesSince(null)).toEqual([CHANGELOG[0]])
+  })
+  it('已經是最新版就沒有更新可說', () => {
+    expect(entriesSince(APP_VERSION)).toEqual([])
   })
 })

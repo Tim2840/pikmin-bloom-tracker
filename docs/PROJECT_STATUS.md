@@ -69,6 +69,12 @@
 ## 後續想法（待使用者決定）
 - 首頁「今天還沒寄給誰」清單；快捷鈕誤點「復原」與同日重複寄出提醒；匯入 CSV；字級修正（仍有數處 `text-xs`，低於 16px 規則）。
 
+## 更新後彈出「更新了什麼」（已上線）
+- `components/WhatsNewModal.tsx`（掛在 `App.tsx` 最後面，才會蓋在導覽列上）：更新完成後第一次打開，彈出這次更新的內容，按鈕「知道了」與「查看更新紀錄」；點空白處或 Esc 等同「知道了」。
+- 判斷在 `lib/changelog.ts`：`piklog_changelog_seen` 記著上次看到的版本。已看過目前版本 → 不彈；全新使用者（沒有版本記錄、也沒用過 App）→ 不彈，但先記下版本；用過 App 卻沒有版本記錄（舊使用者）→ 只列最新一筆；跨多個版本 → 列出之後的每一筆，最多 3 筆。
+- 「用過 App」= localStorage 有 `piklog_tutorial_seen`、`piklog_people` 或 `piklog_records` 其中之一。
+- 與 `UpdatePrompt` 搭配：使用者按「更新」→ 重新載入 → 這個彈窗接著告訴他更新了什麼。
+
 ## 更新紀錄（已上線）
 - 設定頁「更新紀錄」入口（顯示目前版本，沒看過這版時有「新」標記）→ `/changelog`（`ChangelogPage`），由新到舊列出每個版本的日期與說明。資料在 `src/lib/changelog.ts`，`APP_VERSION` 取第一筆；「看過」記在 `piklog_changelog_seen`。
 - **維護規則（已寫進 `CLAUDE.md`）**：每次有使用者看得到的改動上線，同一個 PR 在最前面新增一筆並把版本號往上加（新功能 minor、修正 patch）；白話、簡短、不用括號。`changelog.test.ts` 檢查版本遞減、日期格式、不含括號。
