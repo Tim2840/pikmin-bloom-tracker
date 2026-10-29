@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut, FileDown, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Type, RotateCcw, Smartphone, Share, MoreVertical, Download, CheckCircle2, ExternalLink, ShieldCheck, AlertCircle, LogOut, FileDown, Sparkles, ScrollText, ChevronRight } from 'lucide-react'
 import { useSettingsStore, MIN_SCALE, MAX_SCALE } from '../stores/useSettingsStore'
 import { useAuthStore } from '../stores/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
@@ -9,6 +10,8 @@ import { usePeopleStore } from '../stores/usePeopleStore'
 import { useRecordsStore } from '../stores/useRecordsStore'
 import { buildPeopleCsv, buildRecordsCsv, downloadCsv } from '../lib/exportData'
 import { todayStr } from '../lib/dateUtils'
+import { APP_VERSION, hasUnseenChangelog } from '../lib/changelog'
+import CountPill from '../components/CountPill'
 import { canInstall, isStandalone, promptInstall, subscribeInstallable } from '../lib/pwaInstall'
 
 const PRESETS = [
@@ -26,6 +29,8 @@ export default function SettingsPage() {
   const [confirmLogout, setConfirmLogout] = useState(false)
   const dbEnabled = isSupabaseConfigured()
   const [exportMsg, setExportMsg] = useState('')
+  const navigate = useNavigate()
+  const unseenChangelog = hasUnseenChangelog()
 
   // 匯出前先同步一次（雲端與本機合併後再輸出），讀 store 最新狀態
   const handleExport = async (kind: 'people' | 'records') => {
@@ -233,6 +238,22 @@ export default function SettingsPage() {
           <span className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${settings.effects ? 'bg-lime-600' : 'bg-stone-300'}`}>
             <span className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-all ${settings.effects ? 'left-7' : 'left-1'}`} />
           </span>
+        </button>
+      </section>
+
+      {/* 更新紀錄 */}
+      <section className="glass-card rounded-3xl p-5 md:p-6 mb-6 max-w-xl">
+        <button
+          onClick={() => navigate('/changelog')}
+          className="accessible-target w-full flex items-center gap-3 text-left"
+        >
+          <ScrollText className="w-6 h-6 text-lime-600 shrink-0" />
+          <span className="flex-1 min-w-0">
+            <span className="block text-lg font-extrabold text-stone-800">更新紀錄</span>
+            <span className="block text-base text-stone-500 tabular-nums">版本 {APP_VERSION}</span>
+          </span>
+          {unseenChangelog && <CountPill>新</CountPill>}
+          <ChevronRight className="w-6 h-6 text-stone-300 shrink-0" />
         </button>
       </section>
 
