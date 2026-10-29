@@ -80,6 +80,8 @@
 - 判斷在 `lib/changelog.ts`：`piklog_changelog_seen` 記著上次看到的版本。已看過目前版本 → 不彈；全新使用者（沒有版本記錄、也沒用過 App）→ 不彈，但先記下版本；用過 App 卻沒有版本記錄（舊使用者）→ 只列最新一筆；跨多個版本 → 列出之後的每一筆，最多 3 筆。
 - 「用過 App」= localStorage 有 `piklog_tutorial_seen`、`piklog_people` 或 `piklog_records` 其中之一。
 - 與 `UpdatePrompt` 搭配：使用者按「更新」→ 重新載入 → 這個彈窗接著告訴他更新了什麼。
+- 記錄的版本比目前版本還新（例如舊版快取跑出來）時沒有東西可說：不彈出空視窗，並把記錄校正為目前版本（`WhatsNewModal.decide`）。
+- 首頁「本月足跡」卡片為三個數字並排的緊湊版（高約 126px，原本疊成三列約 230px）；數字 `text-2xl`、標籤維持 16px。
 
 ## 更新紀錄（已上線）
 - 設定頁「更新紀錄」入口（顯示目前版本，沒看過這版時有「新」標記）→ `/changelog`（`ChangelogPage`），由新到舊列出每個版本的日期與說明。資料在 `src/lib/changelog.ts`，`APP_VERSION` 取第一筆；「看過」記在 `piklog_changelog_seen`。

@@ -74,4 +74,7 @@ describe('entriesSince', () => {
   it('已經是最新版就沒有更新可說', () => {
     expect(entriesSince(APP_VERSION)).toEqual([])
   })
+  it('記錄的版本比現在還新時也沒有更新可說', () => {
+    expect(entriesSince('99.0.0')).toEqual([])
+  })
 })

@@ -8,6 +8,7 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  { version: '1.12.1', date: '2026-10-29', items: ['首頁的本月足跡縮小，三個數字並排一眼看完'] },
   { version: '1.12.0', date: '2026-10-29', items: ['新增紀錄時可以搜尋好友', '選好友後會收成一列名字，按「更換」可以重選'] },
   { version: '1.11.0', date: '2026-10-29', items: ['更新時會顯示進度條和百分比'] },
   { version: '1.10.0', date: '2026-10-29', items: ['更新完成後，會告訴你這次更新了什麼'] },

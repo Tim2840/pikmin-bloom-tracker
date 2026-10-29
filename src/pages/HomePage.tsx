@@ -182,8 +182,9 @@ export default function HomePage() {
           </button>
         </div>
 
-        <div className="glass-card rounded-3xl p-6 md:w-72 lg:w-80 shrink-0">
-          <div className="flex items-center gap-2 mb-4">
+        {/* 本月足跡：三個數字並排的緊湊卡片 */}
+        <div className="glass-card rounded-3xl px-5 py-4 md:w-72 lg:w-80 shrink-0">
+          <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-5 h-5 text-amber-500" />
             <h2 className="text-base font-bold text-stone-700">本月足跡</h2>
           </div>
@@ -192,28 +193,20 @@ export default function HomePage() {
               這個月還沒有紀錄，快來記第一筆吧！🌱
             </p>
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-end justify-between">
-                <span className="text-stone-500 text-base">本月互動</span>
-                <span className="text-3xl font-black text-lime-600 tabular-nums">
-                  {monthCount}
-                  <span className="text-base font-bold text-stone-400 ml-1">次</span>
-                </span>
-              </div>
-              <div className="flex items-end justify-between">
-                <span className="text-stone-500 text-base">聯絡好友</span>
-                <span className="text-3xl font-black text-sky-600 tabular-nums">
-                  {monthFriendCount}
-                  <span className="text-base font-bold text-stone-400 ml-1">位</span>
-                </span>
-              </div>
-              <div className="flex items-end justify-between">
-                <span className="text-stone-500 text-base">今天已記</span>
-                <span className="text-3xl font-black text-violet-600 tabular-nums">
-                  {todayRecords.length}
-                  <span className="text-base font-bold text-stone-400 ml-1">筆</span>
-                </span>
-              </div>
+            <div className="grid grid-cols-3 divide-x divide-stone-200/70 text-center">
+              {[
+                { label: '本月互動', value: monthCount, unit: '次', color: 'text-lime-600' },
+                { label: '聯絡好友', value: monthFriendCount, unit: '位', color: 'text-sky-600' },
+                { label: '今天已記', value: todayRecords.length, unit: '筆', color: 'text-violet-600' },
+              ].map(stat => (
+                <div key={stat.label} className="px-1">
+                  <p className={`text-2xl font-black tabular-nums leading-none ${stat.color}`}>
+                    {stat.value}
+                    <span className="text-base font-bold text-stone-400 ml-0.5">{stat.unit}</span>
+                  </p>
+                  <p className="text-stone-500 text-base mt-1.5 whitespace-nowrap">{stat.label}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
