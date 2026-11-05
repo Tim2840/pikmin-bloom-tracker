@@ -46,12 +46,7 @@ export const TUTORIAL_STEPS: Record<string, TutorialStep[]> = {
     {
       selector: '[data-tutorial="people-form"]',
       title: '✏️ 建立新人物',
-      content: '填入好友名字，選好友所在的國家和圖樣，按「建立新人物」就加進去了！超簡單的 😊',
-    },
-    {
-      selector: '[data-tutorial="people-country"]',
-      title: '🌏 選擇國家',
-      content: '記下好友來自哪個國家！名冊裡會顯示國旗，一眼就知道是哪裡的朋友 🌍',
+      content: '按這裡就會跳出表單：填入好友名字，選好友所在的國家和圖樣，再按「建立新人物」就加進去了！可以連續加好幾位，加完按「完成」就好 😊 名冊裡會顯示國旗，一眼就知道是哪裡的朋友 🌍',
     },
     {
       selector: '[data-tutorial="people-list"]',

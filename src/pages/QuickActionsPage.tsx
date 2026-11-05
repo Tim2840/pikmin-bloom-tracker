@@ -115,7 +115,7 @@ export default function QuickActionsPage() {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-50 flex items-center ${
+        <div className={`fixed top-6 inset-x-0 mx-auto w-max max-w-[calc(100vw-2rem)] text-center px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-[60] flex items-center ${
           toast.type === 'success' ? 'bg-amber-500' : 'bg-rose-600'
         }`}>
           {toast.type === 'success' ? <Check className="w-5 h-5 mr-2" /> : <AlertCircle className="w-5 h-5 mr-2" />}

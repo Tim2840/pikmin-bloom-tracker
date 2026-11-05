@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePeopleStore, MAX_PEOPLE } from '../stores/usePeopleStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import {
-  UserPlus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
+  UserPlus, Plus, Edit2, Trash2, X, Check, AlertTriangle, AlertCircle,
   Smile, Heart, Star, Crown, Flower2, Leaf, Gift, Shield,
   ChevronUp, ChevronDown, Zap, HelpCircle, Search, ChevronRight,
 } from 'lucide-react'
@@ -59,6 +59,9 @@ export default function PeoplePage() {
   const [nickname, setNickname] = useState('')
   const [selectedCountry, setSelectedCountry] = useState('')
   const [selectedIcon, setSelectedIcon] = useState(ICON_PRESETS[0].value)
+  const [showAdd, setShowAdd] = useState(false)
+  const [addedCount, setAddedCount] = useState(0)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   // 編輯與刪除狀態
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null)
@@ -84,6 +87,9 @@ export default function PeoplePage() {
     }, 3000)
   }
 
+  const openAdd = () => { setAddedCount(0); setShowAdd(true) }
+  const closeAdd = () => setShowAdd(false)
+
   // 新增處理
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -97,10 +103,11 @@ export default function PeoplePage() {
     }
     const success = await addPerson(name.trim(), nickname.trim(), selectedCountry, selectedIcon)
     if (success) {
+      // 連續新增：只清空姓名與暱稱，國家與圖樣保留，並回到姓名欄接著輸入
       setName('')
       setNickname('')
-      setSelectedCountry('')
-      setSelectedIcon(ICON_PRESETS[0].value)
+      setAddedCount(c => c + 1)
+      nameRef.current?.focus()
       showToast(`成功新增好友：${name}`)
     } else {
       showToast('新增失敗', 'error')
@@ -167,12 +174,24 @@ export default function PeoplePage() {
           </h1>
           <p className="text-stone-500 text-sm md:text-base">新增並設定好友名單，最多 {MAX_PEOPLE} 位</p>
         </div>
+      </div>
+
+      {/* 主要動作：建立新人物（開彈窗）與快捷動作設定 */}
+      <div className="grid grid-cols-2 sm:flex gap-3 mb-6">
+        <button
+          data-tutorial="people-form"
+          onClick={openAdd}
+          className="accessible-target flex items-center justify-center gap-2 bg-lime-600 hover:bg-lime-700 active:scale-95 text-white text-lg font-extrabold px-3 sm:px-6 py-3 rounded-2xl transition-all shadow-md shadow-lime-600/20"
+        >
+          <Plus className="w-5 h-5 shrink-0" />
+          建立新人物
+        </button>
         <button
           data-tutorial="people-qa-btn"
           onClick={() => navigate('/people/quick-actions')}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-4 py-2.5 rounded-2xl transition-all shadow-md shadow-amber-500/20 text-sm shrink-0"
+          className="accessible-target flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-lg font-extrabold px-3 sm:px-6 py-3 rounded-2xl transition-all shadow-md shadow-amber-500/20"
         >
-          <Zap className="w-4 h-4" />
+          <Zap className="w-5 h-5 shrink-0" />
           快捷動作設定
         </button>
       </div>
@@ -200,7 +219,7 @@ export default function PeoplePage() {
 
       {/* Toast 提示浮窗 */}
       {toastMessage && (
-        <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-50 flex items-center transition-all animate-fade-in ${
+        <div className={`fixed top-6 inset-x-0 mx-auto w-max max-w-[calc(100vw-2rem)] text-center px-6 py-3 rounded-full text-white text-base font-bold shadow-lg z-[60] flex items-center transition-all animate-fade-in ${
           toastMessage.type === 'success' ? 'bg-lime-600' : 'bg-rose-600'
         }`}>
           {toastMessage.type === 'success' ? <Check className="w-5 h-5 mr-2" /> : <AlertCircle className="w-5 h-5 mr-2" />}
@@ -209,98 +228,11 @@ export default function PeoplePage() {
       )}
 
       {/* RWD 網格版面：在 md (768px) 以上寬度時分為左右兩欄，手機端則維持上下堆疊 */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 gap-8 items-start">
         
-        {/* 新增人物表單 (左側欄，佔 5/12) */}
-        <section className="md:col-span-5 glass-card rounded-3xl p-5 shadow-sm" data-tutorial="people-form">
-          <h2 className="text-lg font-extrabold text-stone-850 mb-4 flex items-center">
-            <UserPlus className="w-5 h-5 mr-2 text-lime-600" />
-            建立新人物
-          </h2>
-          
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                好友姓名 <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="例如：王小明"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                小名 / 暱稱
-              </label>
-              <input
-                type="text"
-                placeholder="例如：阿明"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
-              />
-            </div>
-
-            {/* 國家選擇 */}
-            <div data-tutorial="people-country">
-              <label className="block text-sm font-bold text-stone-600 mb-1.5">
-                國家
-              </label>
-              <CountrySelect value={selectedCountry} onChange={setSelectedCountry} />
-            </div>
-
-            {/* 圖標選擇器 */}
-            <div>
-              <label className="block text-sm font-bold text-stone-600 mb-2">
-                代表圖樣
-              </label>
-              <div className="grid grid-cols-4 gap-2.5">
-                {ICON_PRESETS.map((preset) => {
-                  const IconComponent = preset.component
-                  const isSelected = selectedIcon === preset.value
-                  return (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => setSelectedIcon(preset.value)}
-                      className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
-                      style={{
-                        backgroundColor: isSelected ? `${ACCENT}15` : '#FFFFFF',
-                        borderColor: isSelected ? ACCENT : '#E5E7EB',
-                        borderWidth: '2px'
-                      }}
-                    >
-                      <IconComponent 
-                        className="w-6 h-6 transition-transform" 
-                        style={{ color: isSelected ? ACCENT : '#6B7280' }} 
-                      />
-                      <span 
-                        className="text-[11px] mt-1 font-bold"
-                        style={{ color: isSelected ? ACCENT : '#6B7280' }}
-                      >
-                        {preset.label}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full h-12 mt-4 bg-lime-600 hover:bg-lime-700 active:scale-98 text-white font-extrabold text-base rounded-2xl transition-all shadow-md shadow-lime-600/20 flex items-center justify-center"
-            >
-              建立新人物
-            </button>
-          </form>
-        </section>
 
         {/* 人物名冊清單 (右側欄，佔 7/12) */}
-        <section className="md:col-span-7 mt-8 md:mt-0" data-tutorial="people-list">
+        <section data-tutorial="people-list">
           <h2 className="text-lg font-extrabold text-stone-850 mb-4">
             👥 好友名冊 <CountPill>{isSearching ? `${visiblePeople.length} / ${people.length}` : people.length} 人</CountPill>
           </h2>
@@ -338,7 +270,7 @@ export default function PeoplePage() {
             <div className="glass-card rounded-3xl p-8 text-center text-stone-500">
               <span className="text-4xl block mb-2">👋</span>
               <p className="font-bold text-stone-700">目前名冊空空的喔！</p>
-              <p className="text-xs text-stone-400 mt-1">請使用左側表單新增第一位好友吧！</p>
+              <p className="text-base text-stone-400 mt-1">按上面的「建立新人物」，新增第一位好友吧！</p>
             </div>
           ) : visiblePeople.length === 0 ? (
             <div className="glass-card rounded-3xl p-8 text-center text-stone-500">
@@ -346,7 +278,7 @@ export default function PeoplePage() {
               <p className="text-base mt-1">換個關鍵字，或清除搜尋看看。</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {visiblePeople.map((person, idx) => {
                 const IconComp = getIconComponent(person.icon)
                 return (
@@ -431,6 +363,121 @@ export default function PeoplePage() {
           )}
         </section>
       </div>
+
+      {/* 建立新人物彈窗：加完留在視窗裡，可以連續新增 */}
+      {showAdd && (
+        <ModalShell onClose={closeAdd}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-black text-stone-800 flex items-center gap-2">
+                <UserPlus className="w-6 h-6 text-lime-600" />
+                建立新人物
+              </h3>
+              <button
+                onClick={closeAdd}
+                className="accessible-target flex items-center justify-center text-stone-400 hover:text-stone-700"
+                aria-label="關閉"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {addedCount > 0 && (
+              <p className="text-base font-bold text-lime-700 bg-lime-50 rounded-xl px-3 py-2 mb-4">
+                ✅ 已連續新增 {addedCount} 位，可以繼續，加完按「完成」
+              </p>
+            )}
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                  好友姓名 <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="例如：王小明"
+                  ref={nameRef}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                  小名 / 暱稱
+                </label>
+                <input
+                  type="text"
+                  placeholder="例如：阿明"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white text-base text-stone-800"
+                />
+              </div>
+
+              {/* 國家選擇 */}
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-1.5">
+                  國家
+                </label>
+                <CountrySelect value={selectedCountry} onChange={setSelectedCountry} />
+              </div>
+
+              {/* 圖標選擇器 */}
+              <div>
+                <label className="block text-sm font-bold text-stone-600 mb-2">
+                  代表圖樣
+                </label>
+                <div className="grid grid-cols-4 gap-2.5">
+                  {ICON_PRESETS.map((preset) => {
+                    const IconComponent = preset.component
+                    const isSelected = selectedIcon === preset.value
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => setSelectedIcon(preset.value)}
+                        className="accessible-target relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-200 bg-white"
+                        style={{
+                          backgroundColor: isSelected ? `${ACCENT}15` : '#FFFFFF',
+                          borderColor: isSelected ? ACCENT : '#E5E7EB',
+                          borderWidth: '2px'
+                        }}
+                      >
+                        <IconComponent 
+                          className="w-6 h-6 transition-transform" 
+                          style={{ color: isSelected ? ACCENT : '#6B7280' }} 
+                        />
+                        <span 
+                          className="text-[11px] mt-1 font-bold"
+                          style={{ color: isSelected ? ACCENT : '#6B7280' }}
+                        >
+                          {preset.label}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={closeAdd}
+                  className="accessible-target flex-1 h-12 rounded-xl bg-stone-100 text-stone-600 text-lg font-bold hover:bg-stone-200 transition-colors"
+                >
+                  完成
+                </button>
+                <button
+                  type="submit"
+                  className="accessible-target flex-1 h-12 rounded-xl bg-lime-600 hover:bg-lime-700 active:scale-95 text-white text-lg font-extrabold transition-all shadow-md shadow-lime-600/20 flex items-center justify-center"
+                >
+                  建立新人物
+                </button>
+              </div>
+            </form>
+          </div>
+        </ModalShell>
+      )}
 
       {/* 編輯 Dialog 彈窗 */}
       {editingPersonId && (
